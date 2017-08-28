@@ -1,0 +1,16 @@
+meta.title=Login
+page.title=Login
+view.top-header=Exemplo básico de autenticador
+view.authenticate=Enviar
+view.username=Nome do usuário
+view.password=Senha
+view.no-account=Criar conta
+view.forgot-password=Esqueceu a senha?
+view.forgot-account-id=Esqueceu o nome de usuário?
+
+view.success=Você está autenticado
+
+validation.error.authentication.failed=Algo errado ocorreu durante sua autenticação. Favor tentar novamente.
+validation.error.incorrect.credentials=Credenciais incorretas
+validation.error.accountId.required=Você deve preencher seu nome de usuário
+validation.error.password.required=Você deve preencher sua senha

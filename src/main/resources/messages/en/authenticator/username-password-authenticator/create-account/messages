@@ -1,0 +1,35 @@
+meta.title=Create Account
+page.title=Create Account
+view.create-account=Create Account
+view.fill-form=Fill out the form to create your Curity account
+view.description=With a Curity account, you can login using strong authentication methods
+view.info-message=Make sure to fill out all fields
+view.firstName=First name
+view.lastName=Last name
+view.email=E-mail
+view.phone=Phone
+view.username=Username
+view.password=Password
+view.repeatPassword=Repeat password
+view.button=Create Account
+view.terms=I agree to the terms of service
+view.success.further-instructions=Further instructions have been emailed to your address
+view.success.success=Your account has been created!
+view.success.verify=An e-mail with a verification link has been sent to you.
+view.success.no-activation=Your can now proceed to the login page
+
+view.success.spam-folder=If you did not receive an email, check your spam folder.
+view.success.return-to-login=Return to login
+
+error.duplicateAccountCheckFailed=An unexpected error has occurred
+error.validation.firstName.required=You have to enter your first name
+error.validation.lastName.required=You have to enter your last name
+error.validation.accountId.required=You have to enter a username
+error.validation.accountId.duplicate=The username you gave is already registered
+error.validation.email.required=You have to enter an e-mail address
+error.validation.email.duplicate=The e-mail address you gave is already registered
+error.validation.email.invalid=The e-mail is not valid
+error.validation.phone.required=You have to enter your phone number
+error.validation.password.required=You have to enter a password
+error.validation.password.mismatch=Your passwords do not match
+error.validation.terms=You have to agree to the terms of service
