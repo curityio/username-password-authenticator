@@ -1,7 +1,7 @@
 # Username/Password HTML Form Authenticator Plugin Example #
 
-[![Quality](https://curity.io/assets/images/badges/username-password-authenticator-quality.svg)](https://curity.io/resources/code-examples/status/)
-[![Availability](https://curity.io/assets/images/badges/username-password-authenticator-availability.svg)](https://curity.io/resources/code-examples/status/)
+[![Quality](https://img.shields.io/badge/quality-test-yellow)](https://curity.io/resources/code-examples/status/)
+[![Availability](https://img.shields.io/badge/availability-source-blue)](https://curity.io/resources/code-examples/status/)
 
 This is a sample Authenticator plugin for the Curity Identity Server.
 
