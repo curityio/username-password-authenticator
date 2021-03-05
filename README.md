@@ -7,14 +7,14 @@ This is a sample Authenticator plugin for the Curity Identity Server.
 
 It demonstrates how to build a simple plugin that can be used to authenticate users via a HTML form with username and password. The Authenticator also showcase an additional custom attribute (region) as part of the authentication. The region input is in the form of a drop-down list.
 
-<img src="docs/username-password-region-authenticator.png" width="200" title="Username-Password-Region Authenticator">
+<img src="docs/username-password-region-authenticator.png" width="300" title="Username-Password-Region Authenticator">
 
 The selected region will be added as a region attribute in the Context attributes.
 
-![Region Attribute in Context](docs/username-password-region-authenticator-debug.png)
+<img src="docs/username-password-region-authenticator-debug.png" width="300" title="Region Attribute in Context">
 
 The region drop-down list in the authentication login screen is populated from the list of approved regions in the Authenticator configuration. 
-![Region Attribute in Context](docs/username-password-region-authenticator-config.png)
+<img src="docs/username-password-region-authenticator-config.png" width="250" title="Region Configuration">
 
 The list of regions is sent in the response using the `putViewData` method.
 
