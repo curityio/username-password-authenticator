@@ -18,7 +18,12 @@ package io.curity.identityserver.plugin.usernamepassword.authentication;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
+import se.curity.identityserver.sdk.attribute.Attribute;
+import se.curity.identityserver.sdk.attribute.AttributeName;
+import se.curity.identityserver.sdk.attribute.AttributeValue;
 import se.curity.identityserver.sdk.attribute.AuthenticationAttributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
@@ -32,8 +37,10 @@ import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -49,6 +56,8 @@ public final class UsernamePasswordAuthenticatorRequestHandler implements Authen
 
     private final CredentialManager _credentialManager;
     private final UserPreferenceManager _userPreferenceManager;
+    private final List<String> _regions;
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordAuthenticatorRequestHandler.class);
 
     /**
      * Tiny container for template variable keys.
@@ -71,6 +80,8 @@ public final class UsernamePasswordAuthenticatorRequestHandler implements Authen
     {
         _credentialManager = configuration.getCredentialManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
+        _regions = configuration.getApprovedRegions();
+
     }
 
     @Override
@@ -84,6 +95,9 @@ public final class UsernamePasswordAuthenticatorRequestHandler implements Authen
         // on request validation failure, we should use the same template as for NOT_FAILURE
         response.setResponseModel(templateResponseModel(emptyMap(),
                 "authenticate/get"), HttpStatus.BAD_REQUEST);
+
+        //Make the regions from the configuration available in the frontend template
+        response.putViewData("REGIONS", _regions, Response.ResponseModelScope.ANY);
 
         return new RequestModel(request);
     }
@@ -126,11 +140,23 @@ public final class UsernamePasswordAuthenticatorRequestHandler implements Authen
 
         if (attributes != null)
         {
-            // authentication was successful, set the result so that the server can see
-            // the user account of the logged in user!
-            result = Optional.of(new AuthenticationResult(attributes));
+            //Check if the submitted region is not in the list of approved regions from configuration
+            if(!_regions.stream().anyMatch(str -> str.trim().equals(model.getRegion())))
+            {
+                response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.region"));
 
-            _userPreferenceManager.saveUsername(model.getUserName());
+                // report a bad request so that the server will come back to the login template
+                response.setHttpStatus(HttpStatus.BAD_REQUEST);
+            }
+            else {
+                Attribute region = Attribute.of(AttributeName.of("region"), AttributeValue.of(model.getRegion()));
+                // authentication was successful, set the result so that the server can see
+                // the user account of the logged in user!
+                // and add the region as a context attribute
+                result = Optional.of(new AuthenticationResult(attributes.withContextAttribute(region)));
+
+                _userPreferenceManager.saveUsername(model.getUserName());
+            }
         }
         else
         {

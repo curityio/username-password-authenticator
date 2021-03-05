@@ -21,6 +21,9 @@ import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 
+import java.util.List;
+import java.util.Optional;
+
 /**
  * Username/Password Authenticator Configuration.
  */
@@ -31,6 +34,7 @@ public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
 
     UserPreferenceManager getUserPreferenceManager();
 
-    AccountManager getAccountManager();
+    Optional<AccountManager> getAccountManager();
 
+    List<String> getApprovedRegions();
 }

@@ -49,6 +49,7 @@ public final class RequestModel
     {
         static final String USERNAME_PARAM = "userName";
         static final String PASSWORD_PARAM = "password";
+        static final String REGION_PARAM = "region";
 
         @NotBlank(message = "validation.error.accountId.required")
         private final String _userName;
@@ -56,10 +57,14 @@ public final class RequestModel
         @NotBlank(message = "validation.error.password.required")
         private final String _password;
 
+        @NotBlank(message = "validation.error.region.required")
+        private final String _region;
+
         Post(Request request)
         {
             _userName = request.getFormParameterValueOrError(USERNAME_PARAM);
             _password = request.getFormParameterValueOrError(PASSWORD_PARAM);
+            _region = request.getFormParameterValueOrError(REGION_PARAM);
         }
 
         String getUserName()
@@ -72,6 +77,11 @@ public final class RequestModel
         {
             // the request model was already validated if this getter ever gets called, so this is safe
             return _password;
+        }
+
+        String getRegion()
+        {
+            return _region;
         }
     }
 }

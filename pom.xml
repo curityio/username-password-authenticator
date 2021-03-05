@@ -52,6 +52,23 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludeArtifactIds>
+                                identityserver.sdk
+                            </excludeArtifactIds>
+                            <outputDirectory>target</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -59,7 +76,7 @@
         <dependency>
             <groupId>se.curity.identityserver</groupId>
             <artifactId>identityserver.sdk</artifactId>
-            <version>5.1.0</version>
+            <version>6.0.0</version>
         </dependency>
 
         <dependency>

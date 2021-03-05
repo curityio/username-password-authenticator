@@ -28,6 +28,15 @@
     <label>#message("authenticator.username-password-authenticator.authenticate.view.password")</label>
     <input type="password" name="password" class="block full-width mb1 field-light">
 
+    <label for="region" class="$!_errorClass">#message("authenticator.username-password-authenticator.authenticate.view.region")</label>
+    <select id="region" name="region" class="block full-width mb1 field-light $!_errorClass">
+        ##    Get the regions from the Authenticator configuration
+        #set($regions = $_context.REGIONS)
+        #foreach($region in $regions)
+            <option value=$region>$region</option>
+        #end
+    </select>
+
     <button type="submit" class="button button-fullwidth button-primary">#message(
         "authenticator.username-password-authenticator.authenticate.view.authenticate")</button>
 
@@ -35,15 +44,7 @@
         <div class="sm-col-12 center py2">
             <a href="$_authUrl/forgot-password">#message(
                 "authenticator.username-password-authenticator.authenticate.view.forgot-password")</a> <br/>
-            <a href="$_authUrl/forgot-account-id">#message(
-                "authenticator.username-password-authenticator.authenticate.view.forgot-account-id")</a>
         </div>
-        #if ($_registerUrl)
-            <div class="sm-col-12 center">
-                <a href="$_registerUrl" class="button button-light-grey button-fullwidth">#message(
-                    "${_templatePrefix}.view.no-account")</a>
-            </div>
-        #end
     </div>
 
 </form>

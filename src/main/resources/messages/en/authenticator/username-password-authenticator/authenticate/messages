@@ -4,6 +4,7 @@ view.top-header=Simple Authenticator Example
 view.authenticate=Login
 view.username=Username
 view.password=Password
+view.region=Region
 view.no-account=Create account
 view.forgot-password=Forgot your password?
 view.forgot-account-id=Forgot your username?
@@ -12,5 +13,7 @@ view.success=You have been successfully authenticated
 
 validation.error.authentication.failed=Something went wrong while authenticating your account. Please try again.
 validation.error.incorrect.credentials=Incorrect credentials
+validation.error.incorrect.region=Invalid region
 validation.error.accountId.required=You have to enter your username
+validation.error.region.required=You have to enter a region
 validation.error.password.required=You have to enter your password

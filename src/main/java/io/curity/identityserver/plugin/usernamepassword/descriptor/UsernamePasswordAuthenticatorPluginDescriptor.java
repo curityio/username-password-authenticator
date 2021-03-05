@@ -18,10 +18,10 @@ package io.curity.identityserver.plugin.usernamepassword.descriptor;
 
 import io.curity.identityserver.plugin.usernamepassword.authentication.UsernamePasswordAuthenticatorRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
-import io.curity.identityserver.plugin.usernamepassword.registration.UsernamePasswordRegistrationRequestHandler;
+//import io.curity.identityserver.plugin.usernamepassword.registration.UsernamePasswordRegistrationRequestHandler;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
-import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
+//import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
 import se.curity.identityserver.sdk.plugin.descriptor.AuthenticatorPluginDescriptor;
 
 import java.util.Map;
@@ -58,11 +58,5 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
     public Map<String, Class<? extends AnonymousRequestHandler<?>>> getAnonymousRequestHandlerTypes()
     {
         return emptyMap();
-    }
-
-    @Override
-    public Map<String, Class<? extends RegistrationRequestHandler<?>>> getRegistrationRequestHandlerTypes()
-    {
-        return singletonMap("index", UsernamePasswordRegistrationRequestHandler.class);
     }
 }
