@@ -32,12 +32,6 @@
         "authenticator.username-password-authenticator.authenticate.view.authenticate")</button>
 
     <div class="mt3 clearfix">
-        <div class="sm-col-12 center py2">
-            <a href="$_authUrl/forgot-password">#message(
-                "authenticator.username-password-authenticator.authenticate.view.forgot-password")</a> <br/>
-            <a href="$_authUrl/forgot-account-id">#message(
-                "authenticator.username-password-authenticator.authenticate.view.forgot-account-id")</a>
-        </div>
         #if ($_registerUrl)
             <div class="sm-col-12 center">
                 <a href="$_registerUrl" class="button button-light-grey button-fullwidth">#message(
