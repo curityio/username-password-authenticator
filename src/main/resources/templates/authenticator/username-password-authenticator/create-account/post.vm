@@ -41,27 +41,26 @@
 ##set($title = "")
 
 #define($_body)
-    <form>
+    <div class="area center">
 
-        <div class="alert alert-success">
-            #message("authenticator.username-password-authenticator.create-account.view.success.further-instructions")
+        <h1>#message("authenticator.username-password-authenticator.create-account.view.success.success")</h1>
+
+#if($_activationMessageAdditionalInfo)
+        <p>#message("authenticator.username-password-authenticator.create-account.$!{_activationMessage}")</p>
+        <p>
+            <small>#message("authenticator.username-password-authenticator.create-account.$!{_activationMessageAdditionalInfo}")</small>
+        </p>
+#else
+        <p>#message("authenticator.username-password-authenticator.create-account.view.success.no-activation")</p>
+#end
+
+        <div class="center py2 login-actions">
+            <a href="$_authUrl">
+                <i class="icon ion-android-arrow-back inlineicon"></i>#message("authenticator.username-password-authenticator.create-account.view.success.return-to-login")
+            </a>
         </div>
 
-        <h3>#message("authenticator.username-password-authenticator.create-account.view.success.success")</h3>
-
-        <div class="well well-white">
-            <h5>#message("authenticator.username-password-authenticator.create-account.$!{_activationMessage}")</h5>
-            #if($_activationMessageAdditionalInfo)
-            <p>
-                <small>#message("authenticator.username-password-authenticator.create-account.$!{_activationMessageAdditionalInfo}")</small>
-            </p>
-            #end
-        </div>
-
-        <a href="$_authUrl" class="button button-medium button-primary button-fullwidth mt2">#message(
-            "authenticator.username-password-authenticator.create-account.view.success.return-to-login")</a>
-
-    </form>
+    </div>
 #end
 
 #parse("layouts/default")

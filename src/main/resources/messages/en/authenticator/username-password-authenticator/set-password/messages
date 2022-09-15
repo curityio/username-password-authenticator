@@ -1,0 +1,15 @@
+meta.title=Set Password
+page.title=Set Password
+view.head1=Set password
+view.newPassword=New password
+view.repeatNewPassword=Repeat new password
+view.button=Update Password
+view.cancel=Cancel
+view.success.head1=Your password has been reset
+view.back.to.login=Take me back to the login page
+
+validation.error.token.invalid=Invalid link. Note that links are only valid for a short period of time.
+validation.error.token.required=Missing token
+validation.error.password.required=Your have to enter a new password
+validation.error.password.mismatch=Your passwords do not match
+validation.error.password.weak=Password not strong enough

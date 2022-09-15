@@ -1,6 +1,6 @@
 meta.title=Login
 page.title=Login
-view.top-header=Simple Authenticator Example
+view.top-header=Custom Authenticator Example
 view.authenticate=Login
 view.username=Username
 view.password=Password
@@ -14,3 +14,4 @@ validation.error.authentication.failed=Something went wrong while authenticating
 validation.error.incorrect.credentials=Incorrect credentials
 validation.error.accountId.required=You have to enter your username
 validation.error.password.required=You have to enter your password
+

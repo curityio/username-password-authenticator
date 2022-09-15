@@ -17,26 +17,32 @@
 package io.curity.identityserver.plugin.usernamepassword.registration;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
-import io.curity.identityserver.plugin.usernamepassword.registration.RequestModel.HtmlFormRegistrationRequestModel;
+import io.curity.identityserver.plugin.usernamepassword.registration.RequestModel.RegistrationRequestModel;
+import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
 import se.curity.identityserver.sdk.attribute.scim.v2.Name;
 import se.curity.identityserver.sdk.attribute.scim.v2.multivalued.PhoneNumber;
+import se.curity.identityserver.sdk.authentication.ActivationResult;
 import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationResult;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
+import se.curity.identityserver.sdk.service.UserPreferenceManager;
+import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
-import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 /**
@@ -45,45 +51,49 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
 public final class UsernamePasswordRegistrationRequestHandler implements RegistrationRequestHandler<RequestModel>
 {
 
-    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
-
     private final AccountManager _accountManager;
     private final CredentialManager _credentialManager;
+    private final AuthenticatorInformationProvider _authenticatorInformationProvider;
+    private final UserPreferenceManager _userPreferenceManager;
+    private final Logger _logger;
 
     public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config)
     {
         _accountManager = config.getAccountManager();
         _credentialManager = config.getCredentialManager();
+        _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
+        _userPreferenceManager = config.getUserPreferenceManager();
+        _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
     }
 
     @Override
     public RequestModel preProcess(Request request, Response response)
     {
+        Map<String, Object> data = new HashMap<>(2);
+        data.put(ViewModelReservedKeys.SHOW_PASSWORD_FIELDS, !_accountManager.isSetPasswordAfterActivation());
+        data.put(ViewModelReservedKeys.SHOW_EMAIL_FIELD, !_accountManager.useUsernameAsEmail());
+
         if (request.isPostRequest())
         {
-            // POST request
-            response.setResponseModel(templateResponseModel(emptyMap(), "create-account/get"),
+            response.setResponseModel(templateResponseModel(data, "create-account/get"),
                     HttpStatus.BAD_REQUEST);
 
-            response.setResponseModel(templateResponseModel(emptyMap(), "create-account/post"),
+            response.setResponseModel(templateResponseModel(data, "create-account/post"),
                     Response.ResponseModelScope.NOT_FAILURE);
         }
         else if (request.isGetRequest())
         {
-            // GET request
-            response.setResponseModel(templateResponseModel(emptyMap(), "create-account/get"),
+            response.setResponseModel(templateResponseModel(data, "create-account/get"),
                     Response.ResponseModelScope.NOT_FAILURE);
         }
 
-        return new RequestModel(request);
+        return new RequestModel(request, _accountManager.useUsernameAsEmail(), _accountManager.isSetPasswordAfterActivation());
     }
 
     @Override
     public Optional<RegistrationResult> get(RequestModel request, Response response)
     {
-        // nothing needs to be done on GET requests, only serve the appropriate template as already done in the
-        // preProcess method.
-        return Optional.empty();
+       return Optional.empty();
     }
 
     @Override
@@ -91,7 +101,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     {
         @Nullable ErrorMessage error;
 
-        HtmlFormRegistrationRequestModel model = requestModel.getPostRequestModel();
+        RegistrationRequestModel model = requestModel.getPostRequestModel();
 
         try
         {
@@ -101,50 +111,49 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         catch (RuntimeException e)
         {
             _logger.error("An unexpected error occurred while check if the user account exists prior to creating it", e);
-
             error = ErrorMessage.withMessage("error.duplicateAccountCheckFailed");
         }
 
         if (error != null)
         {
             response.addErrorMessage(error);
+            onPostRequestValidationError(response, model);
             return Optional.empty();
         }
         else
         {
             return createAccount(model, response);
         }
-
     }
 
-    private Optional<RegistrationResult> createAccount(HtmlFormRegistrationRequestModel requestModel, Response response)
+    private Optional<RegistrationResult> createAccount(RegistrationRequestModel requestModel, Response response)
     {
-        String password = requestModel.getPassword();
-
         // never give a plain-text password to the account directly, use a CredentialManager to transform
         // (hash, salt etc.) the password
+        String password = requestModel.getPassword();
         String transformedPassword = _credentialManager.transform(requestModel.getUserName(), password, null);
 
-        AccountAttributes account = AccountAttributes.of(
-                requestModel.getUserName(), transformedPassword, requestModel.getPrimaryEmail())
-                // this means we will not require confirmation of email/phoneNumber before activating the account
-                .withActive(true);
+        AccountAttributes modelAccount = AccountAttributes.of(
+                requestModel.getUserName(),
+                transformedPassword,
+                requestModel.getPrimaryEmail())
+                .withActive(false);
 
         String firstName = trimmed(requestModel.getFirstName());
         String lastName = trimmed(requestModel.getLastName());
-
-        // if at least one name is given, add it to the account
         if (!firstName.isEmpty() || !lastName.isEmpty())
         {
-            account = account.withName(Name.of(firstName, lastName));
+            modelAccount = modelAccount.withName(Name.of(firstName, lastName));
         }
 
         String phoneNumber = trimmed(requestModel.getPrimaryPhoneNumber());
-
         if (!phoneNumber.isEmpty())
         {
-            account = account.withPhoneNumbers(PhoneNumber.of(phoneNumber, true));
+            modelAccount = modelAccount.withPhoneNumbers(PhoneNumber.of(phoneNumber, true));
         }
+
+        AccountAttributes account = modelAccount
+                .withActive(false);
 
         try
         {
@@ -163,9 +172,45 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
             return Optional.empty();
         }
 
+        _userPreferenceManager.saveUsername(requestModel.getUserName());
+
+        String activateAccountUrl = String.format("%s/activate-account",
+                _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
+        Map<String, Object> model = new HashMap<>(1);
+        model.put(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl);
+
+        ActivationResult activationResult = _accountManager.initializeActivation(account, model);
+        if (activationResult.isDone() || activationResult.isPending())
+        {
+            response.setResponseModel(activationResult.getModel(), HttpStatus.CREATED);
+        }
+
         response.setHttpStatus(HttpStatus.CREATED);
 
         return Optional.empty();
+    }
+
+    @Override
+    public void onRequestModelValidationFailure(Request request, Response response, Set<ErrorMessage> errorMessages)
+    {
+        if (request.isPostRequest())
+        {
+            RegistrationRequestModel requestModel =
+                    new RegistrationRequestModel(request, _accountManager.useUsernameAsEmail(), _accountManager.isSetPasswordAfterActivation());
+
+            Map<String, Object> data = new HashMap<>(1);
+            data.put(ViewModelReservedKeys.FORM_POST_BACK, requestModel.dataOnError());
+
+            // on POST validation failure, go back to the GET template
+            response.setResponseModel(templateResponseModel(data,
+                    "create-account/get"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void onPostRequestValidationError(Response response, RegistrationRequestModel model) {
+
+        response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
+                Response.ResponseModelScope.FAILURE);
     }
 
     private String trimmed(@Nullable String value)

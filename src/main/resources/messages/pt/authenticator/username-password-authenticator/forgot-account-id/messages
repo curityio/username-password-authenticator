@@ -1,0 +1,13 @@
+meta.title=Forgot Username
+page.title=Forgot Username
+view.head1=Forgot your username?
+view.p1=Enter the email address you gave us when you signed up, and we'll send you an email with the username.
+view.email=E-mail
+view.button=Send my username
+view.cancel=Cancel
+view.success.head1=Check your inbox!
+view.success.p1=An email has been sent to you with your username
+view.back.to.login=Take me back to the login page
+
+validation.error.email.required=You have to enter your email address
+validation.error.email.invalid=The email address you entered is not valid

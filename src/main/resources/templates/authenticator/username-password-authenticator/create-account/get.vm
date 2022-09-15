@@ -77,11 +77,14 @@
                    class="block full-width mb1 field-light">
         </div>
 
+#if ($_showEmailField)
         <div class="sm-col sm-col-12 px1">
             <label for="primaryEmail">#message("authenticator.username-password-authenticator.create-account.view.email")</label>
             <input type="email" name="primaryEmail" id="primaryEmail" value="$!{_postBack["primaryEmail"]}"
                    class="block full-width mb1 field-light">
         </div>
+#end
+
         <div class="sm-col sm-col-12 px1">
             <label for="primaryPhoneNumber">#message(
                 "authenticator.username-password-authenticator.create-account.view.phone")</label>
@@ -94,11 +97,21 @@
     <input type="text" name="userName" id="userName" value="$!{_postBack["userName"]}"
            class="block full-width mb1 field-light" autocapitalize="none">
 
-    <label for="password">#message("authenticator.username-password-authenticator.create-account.view.password")</label>
-    <input type="password" name="password" id="password" class="block full-width mb1 field-light">
+    #if ($_showPasswordFields == true)
+        <div class="form-password-reveal-form password-group">
+            <label for="password">#message("authenticator.username-password-authenticator.create-account.view.password")</label>
+            <input class="block full-width mb1 field-light" type="password" name="password">
+            <i class="form-password-reveal-form-icon"></i>
+            <div class="progress progress-thin">
+                <div class="progress-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+            </div>
+        </div>
 
-    <label for="password2">#message("authenticator.username-password-authenticator.create-account.view.repeatPassword")</label>
-    <input type="password" name="password2" id="password2" class="block full-width mb1 field-light">
+        #*
+        <label for="password2">#message("authenticator.username-password-authenticator.create-account.view.repeatPassword")</label>
+        <input type="password" name="password2" id="password2" class="block full-width mb1 field-light">
+        *#
+    #end
 
     <div class="login-links mt3 clearfix">
         <div class="login-links-forgot sm-col md-col-12">

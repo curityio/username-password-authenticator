@@ -18,45 +18,39 @@ package io.curity.identityserver.plugin.usernamepassword.authentication;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
+import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AuthenticationAttributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.http.HttpStatus;
+import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
-import se.curity.identityserver.sdk.web.Produces;
-import se.curity.identityserver.sdk.web.Produces.ContentType;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
-import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
 import static se.curity.identityserver.sdk.web.Response.ResponseModelScope.NOT_FAILURE;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 /**
  * Username/Password Authenticator request handler.
  */
-@Produces(ContentType.HTML)
-public final class UsernamePasswordAuthenticatorRequestHandler implements AuthenticatorRequestHandler<RequestModel>
+public final class UsernamePasswordAuthenticationRequestHandler implements AuthenticatorRequestHandler<RequestModel>
 {
 
+    private final AccountManager _accountManager;
     private final CredentialManager _credentialManager;
     private final UserPreferenceManager _userPreferenceManager;
-
-    /**
-     * Tiny container for template variable keys.
-     */
-    private static class ViewDataKeys
-    {
-        static final String USERNAME = "_username";
-    }
+    private final Logger _logger;
 
     /**
      * Create a new instance of UsernamePasswordAuthenticatorRequestHandler using the configuration for this plugin.
@@ -67,47 +61,41 @@ public final class UsernamePasswordAuthenticatorRequestHandler implements Authen
      * @param configuration for the Username/Password authenticator plugin
      */
 
-    public UsernamePasswordAuthenticatorRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
+    public UsernamePasswordAuthenticationRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
+        _accountManager = configuration.getAccountManager();
         _credentialManager = configuration.getCredentialManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
+        _logger = LoggerFactory.getLogger(UsernamePasswordAuthenticationRequestHandler.class);
     }
 
     @Override
     public RequestModel preProcess(Request request, Response response)
     {
+        Map<String, Object> data = new HashMap<>(2);
+
+        boolean isRegistrationDisabled = (_accountManager == null || !_accountManager.supportsRegistration());
+        data.put(ViewModelReservedKeys.USERNAME, _userPreferenceManager.getUsername());
+        if (isRegistrationDisabled)
+        {
+            data.put(ViewModelReservedKeys.REGISTER_ENDPOINT, null);
+        }
+
         // set the template and model for responses on the NOT_FAILURE scope
         response.setResponseModel(templateResponseModel(
-                singletonMap(ViewDataKeys.USERNAME, _userPreferenceManager.getUsername()),
+                data,
                 "authenticate/get"), NOT_FAILURE);
 
         // on request validation failure, we should use the same template as for NOT_FAILURE
-        response.setResponseModel(templateResponseModel(emptyMap(),
+        response.setResponseModel(templateResponseModel(data,
                 "authenticate/get"), HttpStatus.BAD_REQUEST);
 
         return new RequestModel(request);
     }
 
     @Override
-    public void onRequestModelValidationFailure(Request request, Response response, Set<ErrorMessage> errors)
-    {
-        if (request.isPostRequest())
-        {
-            Collection<String> usernames = request.getFormParameterValues(RequestModel.Post.USERNAME_PARAM);
-
-            if (!usernames.isEmpty())
-            {
-                // re-fill the username field with whatever was entered last time
-                response.putViewData(ViewDataKeys.USERNAME, usernames.iterator().next(), HttpStatus.BAD_REQUEST);
-            }
-        }
-    }
-
-    @Override
     public Optional<AuthenticationResult> get(RequestModel requestModel, Response response)
     {
-        // authentication is never performed using GET, so return an empty optional to let the server know
-        // authentication has not been performed.
         return Optional.empty();
     }
 
@@ -129,17 +117,26 @@ public final class UsernamePasswordAuthenticatorRequestHandler implements Authen
             // authentication was successful, set the result so that the server can see
             // the user account of the logged in user!
             result = Optional.of(new AuthenticationResult(attributes));
-
             _userPreferenceManager.saveUsername(model.getUserName());
         }
         else
         {
             response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.credentials"));
-
-            // report a bad request so that the server will come back to the login template
-            response.setHttpStatus(HttpStatus.BAD_REQUEST);
+            response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
+                    Response.ResponseModelScope.FAILURE);
         }
 
         return result;
+    }
+
+    @Override
+    public void onRequestModelValidationFailure(Request request, Response response, Set<ErrorMessage> errorMessages)
+    {
+        if (request.isPostRequest())
+        {
+            RequestModel.Post model = new RequestModel.Post(request);
+            response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
+                    Response.ResponseModelScope.FAILURE);
+        }
     }
 }

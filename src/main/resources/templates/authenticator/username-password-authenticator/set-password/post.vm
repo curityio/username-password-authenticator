@@ -1,0 +1,56 @@
+#*
+ * Copyright (C) 2022 Curity AB. All rights reserved.
+ *
+ * The contents of this file are the property of Curity AB.
+ * You may not copy or use this file, in either source code
+ * or executable form, except in compliance with terms
+ * set by Curity AB.
+ *
+ * For further information, please contact Curity AB.
+ *#
+
+#*
+ * This view is shown to the user after they have requested that their password be set,
+ * and have entered a new, valid password.
+ *
+ * For a full list of variables available in this template and their associated values, do the following:
+ *
+ * 1. Create a file called globals.vm in <installation-dir>/usr/share/templates/overrides/fragments
+ *
+ * 2. Add the following to this new file:
+ *
+ * <!--
+ *    All variables:
+ *    #foreach ($entry in $_context.entrySet())
+ *        $entry.key => $!entry.value
+ *    #end
+ * -->
+ *
+ * 3. Request this template again and view the HTML source code. All variables and their values will be shown in an
+ *    HTML comment at the top of the file.
+ *
+ * For more information about using the Velocity templating language, refer to
+ * http://velocity.apache.org/engine/devel/user-guide.html.
+ *#
+
+## The title of this page can be overridden by setting the $title variable here to a resource string or the actual value
+##set($title = "")
+
+#set ($page_symbol = $page_symbol_done)
+
+## Define the body block, which is the main content of the view
+#define($_body)
+    <div class="area center">
+        <h1>#message("authenticator.username-password-authenticator.set-password.view.success.head1")</h1>
+
+        #parse("fragments/auto-login")
+        <div class="login-actions center py2">
+            <a href="$_authUrl">
+                <i class="icon ion-android-arrow-back inlineicon"></i>#message("authenticator.username-password-authenticator.set-password.view.back.to.login")
+            </a>
+        </div>
+
+    </div>
+#end
+
+#parse("layouts/default")

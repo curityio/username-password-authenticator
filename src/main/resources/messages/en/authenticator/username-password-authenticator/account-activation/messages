@@ -1,0 +1,27 @@
+meta.title=Activate Account
+page.title=Activate Account
+view.title1=Thank you!
+view.paragraph1=Your account has been activated
+view.back.to.login=Take me back to the login page
+
+view.error.head1=An error occurred
+view.set-password.head=Confirm your account by setting your password
+view.error.p1=Your account has not been activated
+view.newPassword=Choose a password
+
+validation.error.token.invalid=Invalid link. Note that account activation links are only valid for a short period of time.
+validation.error.token.required=Missing token.
+validation.error.email.invalid=Invalid email address.
+validation.error.missing-email-or-phone=Please fill in your email address.
+validation.error.password.required=You must enter a password
+validation.error.password.weak=Password not strong enough
+
+view.newToken.head1=Send a new activation email
+view.newToken.p1=Enter the email address you gave when you created your account and new activation email will be sent to you.
+view.newToken.email=E-mail
+view.newToken.button=Send new activation email
+
+view.newTokenSent.h1=A new activation email has been sent
+view.newTokenSent.p1=An e-mail with an activation link has been sent to you.
+
+view.button=Activate

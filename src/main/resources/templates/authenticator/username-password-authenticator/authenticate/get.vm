@@ -14,6 +14,35 @@
 *  limitations under the License.
 *#
 
+#*
+ * This is the default authentication view that collects the username and password from the user.
+ *
+ * For a full list of variables available in this template and their associated values, do the following:
+ *
+ * 1. Create a file called globals.vm in <installation-dir>/usr/share/templates/overrides/fragments
+ *
+ * 2. Add the following to this new file:
+ *
+ * <!--
+ *    All variables:
+ *    #foreach ($entry in $_context.entrySet())
+ *        $entry.key => $!entry.value
+ *    #end
+ * -->
+ *
+ * 3. Request this template again and view the HTML source code. All variables and their values will be shown in an
+ *    HTML comment at the top of the file.
+ *
+ * For more information about using the Velocity templating language, refer to
+ * http://velocity.apache.org/engine/devel/user-guide.html.
+ *#
+
+#if($_postBack && $_postBack["userName"])
+    #set($userNameValue = $_postBack["userName"])
+#elseif($_username)
+    #set($userNameValue = $_username)
+#end
+
 #define ($_body)
 <h2>#message("authenticator.username-password-authenticator.authenticate.view.top-header")</h2>
 <form method="post" action="$_authUrl">
@@ -32,10 +61,21 @@
         "authenticator.username-password-authenticator.authenticate.view.authenticate")</button>
 
     <div class="mt3 clearfix">
+        <div class="sm-col-12 center py2">
+            
+            <a href="$_authUrl/forgot-password">#message(
+                "${_templatePrefix}.view.forgot-password")</a> <br/>
+
+            <a href="$_authUrl/forgot-account-id">#message(
+                "${_templatePrefix}.view.forgot-account-id")</a>
+            
+        </div>
         #if ($_registerUrl)
             <div class="sm-col-12 center">
-                <a href="$_registerUrl" class="button button-light-grey button-fullwidth">#message(
-                    "${_templatePrefix}.view.no-account")</a>
+                <a href="$_registerUrl" class="mt2">
+                    <i class="icon ion-android-person-add"></i>
+                    #message("${_templatePrefix}.view.no-account")
+                </a>
             </div>
         #end
     </div>

@@ -1,0 +1,100 @@
+#*
+ * Copyright (C) 2022 Curity AB. All rights reserved.
+ *
+ * The contents of this file are the property of Curity AB.
+ * You may not copy or use this file, in either source code
+ * or executable form, except in compliance with terms
+ * set by Curity AB.
+ *
+ * For further information, please contact Curity AB.
+ *#
+
+#*
+ * This view is shown to the user when they request that their password be changed.
+ *
+ * For a full list of variables available in this template and their associated values, do the following:
+ *
+ * 1. Create a file called globals.vm in <installation-dir>/usr/share/templates/overrides/fragments
+ *
+ * 2. Add the following to this new file:
+ *
+ * <!--
+ *    All variables:
+ *    #foreach ($entry in $_context.entrySet())
+ *        $entry.key => $!entry.value
+ *    #end
+ * -->
+ *
+ * 3. Request this template again and view the HTML source code. All variables and their values will be shown in an
+ *    HTML comment at the top of the file.
+ *
+ * For more information about using the Velocity templating language, refer to
+ * http://velocity.apache.org/engine/devel/user-guide.html.
+ *#
+
+## The title of this page can be overridden by setting the $title variable here to a resource string or the actual value
+##set($title = "")
+
+#if($_postBack && $_postBack.userName)
+    #set($userNameValue = $_postBack.userName)
+#elseif($_username)
+    #set($userNameValue = $_username)
+#end
+
+#define($_body)
+<form method="post">
+
+    <div class="center">
+        <h1>#message("authenticator.username-password-authenticator.forgot-password.view.head1")</h1>
+        <p>#message("authenticator.username-password-authenticator.forgot-password.view.p1")</p>
+    </div>
+
+#if ($_showEmailField)
+    <div class="form-field">
+        <label for="primaryEmail" class="$!_errorClass">#message("authenticator.username-password-authenticator.forgot-password.view.email")</label>
+        <input type="email" name="primaryEmail" class="block full-width mb1 field-light $!_errorClass"
+        value="$!{_postBack.primaryEmail}" autofocus>
+        <i class="form-field-icon icon ion-email"></i>
+    </div>
+#end
+
+    <div class="form-field">
+        <label for="userName" class="$!_errorClass">#message("authenticator.username-password-authenticator.forgot-password.view.username")</label>
+        <input type="text" name="userName" class="block full-width mb1 field-light $!_errorClass"
+        value="$!userNameValue" autocapitalize="none" autofocus>
+        <i class="form-field-icon icon ion-person"></i>
+    </div>
+
+    <button type="submit" class="button button-fullwidth button-primary">#message("${_templatePrefix}.view.button")</button>
+    <p class="center mt2 mb2">#message("authenticator.username-password-authenticator.forgot-password.view.or")</p>
+
+    <div class="login-actions center py2">
+        <a href="$_authUrl">
+            <i class="icon ion-android-arrow-back inlineicon"></i>#message("authenticator.username-password-authenticator.forgot-password.view.cancel")
+        </a>
+    </div>
+
+</form>
+#end
+
+#*
+ * The sections and variables defined above will be available in the layout. If the layout is overridden (i.e.,
+ * third-party/base/layout.vm exists), that one will be used; otherwise, the default one will be used.
+ *
+ * If you plan to only override the layout for some pages, you should use a different template besides layout.vm. For
+ * example, you could call that layout special-layout.vm. You could put this directly in the third-party directory,
+ * but the convention would be to place it in third-party/base. In either case, this one would be used by only this
+ * template while others would continue to use layout.vm.
+ *
+ * This technique can also be helpful during the development process. In such cases, you may create a layout that
+ * you are testing out or one that prints all variables or extra debug statements. To use that one instead, use that
+ * one as the path below. In such cases, you may also place the layout in the third-party-debug template package
+ * directory (i.e., <installation-dir>/usr/share/templates/third-party-debug). When a layout is found there, it will
+ * be used before any in third-party or provided. By placing tempaltes and layouts in this directory, it will be more
+ * clear that the template is not meant for production use.
+ *
+ * Another helpful technique when the layout has been overriden everywhere is to save the provided layout in a file
+ * called provided-layout.vm under third-party-debug. This will allow you to quickly return to the provided layout for
+ * a particular template while continuing to use your custom one everwhere else on your site.
+ *#
+#parse("layouts/default")

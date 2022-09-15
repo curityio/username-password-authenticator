@@ -16,19 +16,21 @@
 
 package io.curity.identityserver.plugin.usernamepassword.authentication;
 
-import org.hibernate.validator.constraints.NotBlank;
+import com.google.common.html.HtmlEscapers;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.web.Request;
 
-import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public final class RequestModel
 {
-
     /**
      * If the request is not a POST request, this variable can be set to null.
-     * Otherwise, it must not be null and it gets validated by the server using Hibernate annotations.
+     * Otherwise, it must not be null and it gets validated by the server using Java annotations.
      */
     @Nullable
     @Valid
@@ -72,6 +74,13 @@ public final class RequestModel
         {
             // the request model was already validated if this getter ever gets called, so this is safe
             return _password;
+        }
+
+        Map<String, Object> dataOnError()
+        {
+            Map<String, Object> data = new HashMap<>(2);
+            data.put(USERNAME_PARAM, _userName == null ? "" : HtmlEscapers.htmlEscaper().escape(_userName));
+            return data;
         }
     }
 }

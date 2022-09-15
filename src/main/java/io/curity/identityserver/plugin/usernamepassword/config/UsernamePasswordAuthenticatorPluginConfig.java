@@ -17,20 +17,40 @@
 package io.curity.identityserver.plugin.usernamepassword.config;
 
 import se.curity.identityserver.sdk.config.Configuration;
+import se.curity.identityserver.sdk.config.annotation.Description;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
+import se.curity.identityserver.sdk.service.EmailSender;
+import se.curity.identityserver.sdk.service.ExceptionFactory;
+import se.curity.identityserver.sdk.service.NonceTokenIssuer;
+import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
+import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+
+import java.util.Optional;
 
 /**
  * Username/Password Authenticator Configuration.
  */
+@Description("A custom implementation of username password flows")
 public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
 {
-
+    @Description("The Credential Manager is used to verify the credentials")
     CredentialManager getCredentialManager();
 
     UserPreferenceManager getUserPreferenceManager();
 
+    @Description("The Account Manager is used to fetch the account")
     AccountManager getAccountManager();
 
+    @Description("Email provider to use for 'forgot password' and 'forgot username' procedures")
+    EmailSender getEmailSender();
+
+    NonceTokenIssuer getNonceTokenIssuer();
+
+    AuthenticatorInformationProvider getAuthenticatorInformationProvider();
+
+    SessionManager getSessionManager();
+
+    ExceptionFactory getExceptionFactory();
 }

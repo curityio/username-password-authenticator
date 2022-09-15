@@ -1,0 +1,4 @@
+email.subject=Verify your account
+email.title=Verify Account
+email.head1=To verify your account, click the button below
+email.button=Verify

@@ -1,0 +1,47 @@
+#*
+ * Copyright (C) 2022 Curity AB. All rights reserved.
+ *
+ * The contents of this file are the property of Curity AB.
+ * You may not copy or use this file, in either source code
+ * or executable form, except in compliance with terms
+ * set by Curity AB.
+ *
+ * For further information, please contact Curity AB.
+ *#
+
+#*
+ * This is an intermediate view rendered as a circuit-breaker for non-browser clients when users follow account activation links.
+ *
+ * For a full list of variables available in this template and their associated values, do the following:
+ *
+ * 1. Create a file called globals.vm in <installation-dir>/usr/share/templates/overrides/fragments
+ *
+ * 2. Add the following to this new file:
+ *
+ * <!--
+ *    All variables:
+ *    #foreach ($entry in $_context.entrySet())
+ *        $entry.key => $!entry.value
+ *    #end
+ * -->
+ *
+ * 3. Request this template again and view the HTML source code. All variables and their values will be shown in an
+ *    HTML comment at the top of the file.
+ *
+ * For more information about using the Velocity templating language, refer to
+ * http://velocity.apache.org/engine/devel/user-guide.html.
+ *#
+
+## The title of this page can be overridden by setting $title here to a resource string or the actual value
+##set($title = "")
+
+#set( $_callbackUrl = $_action )
+#set( $_callbackMethod = "get" )
+
+#define ($_formContent)
+    #foreach($param in $formParameters.entrySet())
+    <input type="hidden" name="$param.key" value="$param.value"/>
+    #end
+#end
+
+#parse("layouts/redirect")
