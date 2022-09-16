@@ -19,6 +19,7 @@ package io.curity.identityserver.plugin.usernamepassword.forgotPassword;
 import com.google.common.html.HtmlEscapers;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
+import io.curity.identityserver.plugin.usernamepassword.utils.NullEmailSender;
 import io.curity.identityserver.plugin.usernamepassword.utils.StringUtils;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
@@ -80,9 +81,18 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         _userPreferenceManager = configuration.getUserPreferenceManager();
         _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
-        _emailSender = configuration.getEmailSender();
         _exceptionFactory = configuration.getExceptionFactory();
         _logger = LoggerFactory.getLogger(UsernamePasswordForgotPasswordRequestHandler.class);
+
+        if (configuration.getEmailSender().isPresent())
+        {
+            _emailSender = configuration.getEmailSender().get();
+        }
+        else
+        {
+            _logger.info("No email provider has been configured");
+            _emailSender = new NullEmailSender();
+        }
     }
 
     @Override

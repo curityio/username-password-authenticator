@@ -44,7 +44,7 @@ public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
     AccountManager getAccountManager();
 
     @Description("Email provider to use for 'forgot password' and 'forgot username' procedures")
-    EmailSender getEmailSender();
+    Optional<EmailSender> getEmailSender();
 
     NonceTokenIssuer getNonceTokenIssuer();
 
