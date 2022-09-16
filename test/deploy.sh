@@ -30,10 +30,10 @@ export RUNTIME_BASE_URL='https://localhost:8443'
 if [ "$USE_NGROK" != 'false' ]; then
 
   if [ "$(pgrep ngrok)" == '' ]; then
-    ngrok http 8443 -log=stdout &
+    ngrok http 8443 --log=stdout &
     sleep 5
   fi
-  
+
   export RUNTIME_BASE_URL=$(curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "https") | .public_url')
   if [ "$RUNTIME_BASE_URL" == "" ]; then
     echo 'Problem encountered getting an NGROK URL'
@@ -57,6 +57,8 @@ fi
 # Indicate the URL to paste into OAuth tools
 #
 echo "The OpenID Connect Metadata URL is: $RUNTIME_BASE_URL/oauth/v2/oauth-anonymous/.well-known/openid-configuration"
+echo "${RUNTIME_BASE_URL}/oauth/v2/oauth-anonymous/.well-known/openid-configuration" | pbcopy
+echo "✅ Copied the OpenID Connect Metadata URL to clipboard"
 
 #
 # View logs in a child window
