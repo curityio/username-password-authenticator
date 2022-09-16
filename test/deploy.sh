@@ -45,7 +45,6 @@ fi
 # Deploy the system
 #
 cd test
-#cp ~/Desktop/config-backup.xml ./config-backup.xml
 docker compose --project-name usernamepassword down
 docker compose --project-name usernamepassword up --force-recreate --detach
 if [ $? -ne 0 ]; then
