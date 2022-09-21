@@ -9,6 +9,7 @@ services:
     volumes:
      - ./license.json:/opt/idsvr/etc/init/license/license.json
      - ./config-backup.xml:/opt/idsvr/etc/init/config.xml
+     - ./example-logo.png:/opt/idsvr/usr/share/webroot/assets/images/example-logo.png
     environment:
       PASSWORD: 'Password1'
       LOGGING_LEVEL: 'INFO'
