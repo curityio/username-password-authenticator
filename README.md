@@ -28,7 +28,7 @@ Each of these are described, with screenshots and plugin coding details, in the 
 - [Authentication](doc/authentication.md)
 - [Create Account](doc/create-account.md)
 - [Activate Account](doc/activate-account.md)
-- [Activate and Set Password](activate-set-password.md)
+- [Activate and Set Password](/doc/activate-set-password.md)
 - [Forgot Username](doc/forgot-username.md)
 - [Forgot Password](doc/forgot-password.md)
 - [Set Password](doc/set-password.md)
