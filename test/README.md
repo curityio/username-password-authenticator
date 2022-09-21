@@ -13,7 +13,7 @@ Also ensure that these tools are installed on your local computer:
 
 ## Deploy the Plugin
 
-Whenever the plugin code changes, build the code into JAR files in a custom Docker image:
+Whenever the plugin code changes, build it into JAR files in a custom Docker image:
 
 ```bash
 ./test/build.sh
@@ -33,7 +33,7 @@ The script will output an external base URL that is called from OAuth tools:
 https://4bdb-2-26-158-168.eu.ngrok.io/oauth/v2/oauth-anonymous/.well-known/openid-configuration
 ```
 
-## Test the Plugin
+## Configure OAuth Tools
 
 Browse to https://oauth.tools and create an environment from the metadata URL:
 
@@ -43,15 +43,7 @@ In the `Code Flow` window, configure the three values highlighted below:
 
 ![OAuth Tools Configuration](images/codeflow-settings.png)
 
-On the initial login, select `Create Account` and register a new user:
-
-![Create Account](../doc/images/create-account/initial.png)
-
-Then sign in as the new user:
-
-![Authenticate](../doc/images/authentication/initial.png)
-
-## Identity Server Configuration
+## Configure the Curity Identity Server
 
 Login to the admin UI at this URL, with credentials `admin / Password1`:
 
@@ -61,9 +53,20 @@ From the `Facilities` menu, configure the account manager options according to y
 
 ![Account Manager](../doc/images/shared/account-manager.png)
 
-To use email features for activation and account recovery, you will need to update the email provider:
+To use email features for account activation and recovery, update the email provider settings:
 
 ![Email Provider](../doc/images/shared/email-provider.png)
+
+## Test Password Flows
+
+The system is deployed using an in-memory database for user accounts.\
+Whenever the system is deployed, select `Create Account` and register one or more users:
+
+![Create Account](../doc/images/create-account/initial.png)
+
+Then activate the user if required, sign in, and test recovery fewatures such as set password:
+
+![Authenticate](../doc/images/authentication/initial.png)
 
 ## Free Resources
 
