@@ -13,21 +13,21 @@ Also ensure that these tools are installed on your local computer:
 
 ## Deploy the Plugin
 
-Whenever the plugin code changes, build it into JAR files in a custom Docker image:
+Whenever you change the plugin code, build it into deployable JAR files.\
+The build script does so by producing a custom Docker image for the Curity Identity Server:
 
 ```bash
 ./test/build.sh
 ```
 
-Then deploy the Curity Identity Server using the updated Docker image.\
-The example deployment also exposes port 8443 of the local identity server to the internet, via ngrok.\
-This enables the internet hosted OAuth Tools to be used as a test client:
+The example deployment enables the internet based OAuth Tools to be used as a test client.\
+The deployment script uses ngrok to expose port 8443 of the local identity server to OAuth Tools:
 
 ```bash
 ./test/deploy.sh
 ```
 
-The script will output an external base URL that is called from OAuth tools:
+The script outputs an external base URL that is called from OAuth tools:
 
 ```text
 https://4bdb-2-26-158-168.eu.ngrok.io/oauth/v2/oauth-anonymous/.well-known/openid-configuration
@@ -59,8 +59,8 @@ To use email features for account activation and recovery, update the email prov
 
 ## Test Password Flows
 
-The system is deployed using an in-memory database for user accounts.\
-Whenever the system is deployed, select `Create Account` and register one or more users:
+Run a code flow from OAuth tools to perform end-to-end testing of password flows.\
+Whenever the system is deployed, select `Create Account` and register a user:
 
 ![Create Account](../doc/images/create-account/initial.png)
 
