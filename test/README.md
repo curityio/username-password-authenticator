@@ -64,7 +64,7 @@ Whenever the system is deployed, select `Create Account` and register one or mor
 
 ![Create Account](../doc/images/create-account/initial.png)
 
-Then activate the user if required, sign in, and test recovery fewatures such as set password:
+Activate the user if required, then test logins and account recovery behaviour:
 
 ![Authenticate](../doc/images/authentication/initial.png)
 
