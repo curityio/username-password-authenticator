@@ -29,12 +29,12 @@ import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
+import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,11 +46,12 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
  */
 public final class UsernamePasswordAuthenticationRequestHandler implements AuthenticatorRequestHandler<RequestModel>
 {
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordAuthenticationRequestHandler.class);
 
     private final AccountManager _accountManager;
     private final CredentialManager _credentialManager;
     private final UserPreferenceManager _userPreferenceManager;
-    private final Logger _logger;
+    private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
     /**
      * Create a new instance of UsernamePasswordAuthenticatorRequestHandler using the configuration for this plugin.
@@ -66,19 +67,23 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         _accountManager = configuration.getAccountManager();
         _credentialManager = configuration.getCredentialManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
-        _logger = LoggerFactory.getLogger(UsernamePasswordAuthenticationRequestHandler.class);
+        _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
     }
 
     @Override
     public RequestModel preProcess(Request request, Response response)
     {
-        Map<String, Object> data = new HashMap<>(2);
+        var data = new HashMap<String, Object>(2);
 
         boolean isRegistrationDisabled = (_accountManager == null || !_accountManager.supportsRegistration());
         data.put(ViewModelReservedKeys.USERNAME, _userPreferenceManager.getUsername());
         if (isRegistrationDisabled)
         {
             data.put(ViewModelReservedKeys.REGISTER_ENDPOINT, null);
+        }
+        else
+        {
+            data.put(ViewModelReservedKeys.REGISTER_ENDPOINT, _authenticatorInformationProvider.getFullyQualifiedRegistrationUri());
         }
 
         // set the template and model for responses on the NOT_FAILURE scope
@@ -102,7 +107,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     @Override
     public Optional<AuthenticationResult> post(RequestModel requestModel, Response response)
     {
-        RequestModel.Post model = requestModel.getPostRequestModel();
+        var model = requestModel.getPostRequestModel();
 
         Optional<AuthenticationResult> result = Optional.empty();
 
@@ -134,7 +139,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     {
         if (request.isPostRequest())
         {
-            RequestModel.Post model = new RequestModel.Post(request);
+            var model = new RequestModel.Post(request);
             response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
                     Response.ResponseModelScope.FAILURE);
         }

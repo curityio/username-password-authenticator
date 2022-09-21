@@ -32,7 +32,6 @@ import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
@@ -40,14 +39,14 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
 public class UsernamePasswordActivateAccountRequestHandler
         implements AnonymousRequestHandler<ActivateAccountRequestModel> {
 
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordActivateAccountRequestHandler.class);
+
     private final AccountManager _accountManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
-    private final Logger _logger;
 
     public UsernamePasswordActivateAccountRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration) {
         _accountManager = configuration.getAccountManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
-        _logger = LoggerFactory.getLogger(UsernamePasswordActivateAccountRequestHandler.class);
     }
 
     @Override
@@ -70,7 +69,7 @@ public class UsernamePasswordActivateAccountRequestHandler
                     "account-activation/request-new-activation"), HttpStatus.BAD_REQUEST);
         }
 
-        String activateAccountUrl = String.format("%s/activate",
+        var activateAccountUrl = String.format("%s/activate",
                 _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
         response.putViewData(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl, Response.ResponseModelScope.ANY);
 
@@ -80,7 +79,7 @@ public class UsernamePasswordActivateAccountRequestHandler
     @Override
     public Void get(ActivateAccountRequestModel requestModel, Response response)
     {
-        ActivateAccountRequestModel.Get model = requestModel.getGetRequestModel();
+        var model = requestModel.getGetRequestModel();
 
         String tokenAsString = model.getToken();
         ActivationResult activationResult = _accountManager.activateAccount(tokenAsString);
@@ -102,7 +101,7 @@ public class UsernamePasswordActivateAccountRequestHandler
     @Nullable
     public Void post(ActivateAccountRequestModel requestModel, Response response)
     {
-        ActivateAccountRequestModel.Post model = requestModel.getPostRequestModel();
+        var model = requestModel.getPostRequestModel();
 
         @Nullable AccountAttributes account = null;
 
@@ -115,7 +114,7 @@ public class UsernamePasswordActivateAccountRequestHandler
         {
             String activateAccountUrl = String.format("%s/activate-account",
                     _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
-            Map<String, Object> data = new HashMap<>(1);
+            var data = new HashMap<String, Object>(1);
             data.put(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl);
 
             ActivationResult activationResult = _accountManager.initializeActivation(account, data);

@@ -39,7 +39,6 @@ import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,12 +49,12 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
  */
 public final class UsernamePasswordRegistrationRequestHandler implements RegistrationRequestHandler<RequestModel>
 {
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
 
     private final AccountManager _accountManager;
     private final CredentialManager _credentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
-    private final Logger _logger;
 
     public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config)
     {
@@ -63,13 +62,12 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         _credentialManager = config.getCredentialManager();
         _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
         _userPreferenceManager = config.getUserPreferenceManager();
-        _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
     }
 
     @Override
     public RequestModel preProcess(Request request, Response response)
     {
-        Map<String, Object> data = new HashMap<>(2);
+        var data = new HashMap<String, Object>(2);
         data.put(ViewModelReservedKeys.SHOW_PASSWORD_FIELDS, !_accountManager.isSetPasswordAfterActivation());
         data.put(ViewModelReservedKeys.SHOW_EMAIL_FIELD, !_accountManager.useUsernameAsEmail());
 
@@ -101,7 +99,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     {
         @Nullable ErrorMessage error;
 
-        RegistrationRequestModel model = requestModel.getPostRequestModel();
+        var model = requestModel.getPostRequestModel();
 
         try
         {
@@ -174,9 +172,9 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         _userPreferenceManager.saveUsername(requestModel.getUserName());
 
-        String activateAccountUrl = String.format("%s/activate-account",
+        var activateAccountUrl = String.format("%s/activate-account",
                 _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
-        Map<String, Object> model = new HashMap<>(1);
+        var model = new HashMap<String, Object>(1);
         model.put(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl);
 
         ActivationResult activationResult = _accountManager.initializeActivation(account, model);
@@ -195,10 +193,10 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     {
         if (request.isPostRequest())
         {
-            RegistrationRequestModel requestModel =
+            var requestModel =
                     new RegistrationRequestModel(request, _accountManager.useUsernameAsEmail(), _accountManager.isSetPasswordAfterActivation());
 
-            Map<String, Object> data = new HashMap<>(1);
+            var data = new HashMap<String, Object>(1);
             data.put(ViewModelReservedKeys.FORM_POST_BACK, requestModel.dataOnError());
 
             // on POST validation failure, go back to the GET template

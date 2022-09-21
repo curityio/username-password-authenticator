@@ -20,8 +20,8 @@ import com.google.common.html.HtmlEscapers;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
 import io.curity.identityserver.plugin.usernamepassword.utils.NullEmailSender;
-import io.curity.identityserver.plugin.usernamepassword.utils.StringUtils;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
@@ -47,7 +47,6 @@ import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -67,13 +66,14 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
      * @param configuration for the Username/Password authenticator plugin
      */
 
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordForgotPasswordRequestHandler.class);
+
     private final UserPreferenceManager _userPreferenceManager;
     private final AccountManager _accountManager;
     private final EmailSender _emailSender;
     private final NonceTokenIssuer _nonceTokenIssuer;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final ExceptionFactory _exceptionFactory;
-    private final Logger _logger;
 
     public UsernamePasswordForgotPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
@@ -82,7 +82,6 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
         _exceptionFactory = configuration.getExceptionFactory();
-        _logger = LoggerFactory.getLogger(UsernamePasswordForgotPasswordRequestHandler.class);
 
         if (configuration.getEmailSender().isPresent())
         {
@@ -98,7 +97,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     @Override
     public RequestModel preProcess(Request request, Response response)
     {
-        Map<String, Object> data = new HashMap<>(1);
+        var data = new HashMap<String, Object>(1);
         data.put(ViewModelReservedKeys.SHOW_EMAIL_FIELD, !_accountManager.useUsernameAsEmail());
 
         if (request.isPostRequest())
@@ -106,7 +105,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
             response.setResponseModel(templateResponseModel(data, "forgot-password/post"),
                     Response.ResponseModelScope.NOT_FAILURE);
 
-            RequestModel.PostRequestModel postModel = new RequestModel.PostRequestModel(request);
+            var postModel = new RequestModel.PostRequestModel(request);
             data.put(ViewModelReservedKeys.USERNAME, postModel.getUsername());
 
             response.setResponseModel(templateResponseModel(data, "forgot-password/get"),
@@ -114,7 +113,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         }
         else if (request.isGetRequest())
         {
-            RequestModel.GetRequestModel getModel = new RequestModel.GetRequestModel(_userPreferenceManager);
+            var getModel = new RequestModel.GetRequestModel(_userPreferenceManager);
             data.put(ViewModelReservedKeys.USERNAME, getModel.getUsername());
 
             response.setResponseModel(templateResponseModel(data, "forgot-password/get"),
@@ -133,7 +132,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     @Override
     public Optional<AuthenticationResult> post(RequestModel requestModel, Response response)
     {
-        RequestModel.PostRequestModel postModel = requestModel.getPostRequestModel();
+        var postModel = requestModel.getPostRequestModel();
 
         @Nullable String username = postModel.getUsername();
         @Nullable String emailAddress = postModel.getPrimaryEmail();
@@ -166,14 +165,14 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     private void onAccountFound(Response response, String emailValue, AccountAttributes account) {
 
         String nonce = issueNonce(account);
-        Map<String, Object> emailModel = new HashMap<>(2);
+        var emailModel = new HashMap<String, Object>(2);
         emailModel.put("nonce", nonce);
 
-        String setPasswordUrl = String.format("%s/set-password",
+        var setPasswordUrl = String.format("%s/set-password",
                 _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
         emailModel.put(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, setPasswordUrl);
 
-        Email emailToSend = new Email(emailModel);
+        var emailToSend = new Email(emailModel);
         _emailSender.sendEmail(emailValue, emailToSend, "email/forgot-password/email");
 
         response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, emailValue, Response.ResponseModelScope.NOT_FAILURE);
@@ -192,7 +191,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
                             username, emailAddress, emailValue);
 
             // pretend the email was sent out successfully to protect against spear phishing attacks
-            String recipient = StringUtils.isNotBlank(username) ? username : emailAddress;
+            var recipient = StringUtils.isNotBlank(username) ? username : emailAddress;
             response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, HtmlEscapers.htmlEscaper().escape(recipient), Response.ResponseModelScope.NOT_FAILURE);
         }
         else
@@ -207,12 +206,12 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
 
         try
         {
-            Map<String, Object> tokenValue = new HashMap<>(1);
+            var tokenValue = new HashMap<String, Object>(1);
             tokenValue.put("accountId", account.getUserName());
 
-            Instant now = Instant.now();
-            Instant expires = now.plus(Duration.ofSeconds(1200));
-            TokenAttributes tokenAttributes = new TokenAttributes(expires, now, Attributes.fromMap(tokenValue));
+            var now = Instant.now();
+            var expires = now.plus(Duration.ofSeconds(1200));
+            var tokenAttributes = new TokenAttributes(expires, now, Attributes.fromMap(tokenValue));
             return _nonceTokenIssuer.issue(tokenAttributes);
         }
         catch (TokenIssuerException ignored)
@@ -228,8 +227,8 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     {
         if (request.isPostRequest())
         {
-            RequestModel.PostRequestModel requestModel = new RequestModel.PostRequestModel(request);
-            Map<String, Object> data = new HashMap<>(1);
+            var requestModel = new RequestModel.PostRequestModel(request);
+            var data = new HashMap<String, Object>(1);
             data.put(ViewModelReservedKeys.FORM_POST_BACK, requestModel.dataOnError());
 
             // on POST validation failure, go back to the GET template

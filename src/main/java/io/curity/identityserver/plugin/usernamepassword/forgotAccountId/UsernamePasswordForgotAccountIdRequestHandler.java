@@ -37,7 +37,6 @@ import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -59,14 +58,14 @@ public final class UsernamePasswordForgotAccountIdRequestHandler implements Auth
      * @param configuration for the Username/Password authenticator plugin
      */
 
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordForgotAccountIdRequestHandler.class);
+
     private final AccountManager _accountManager;
     private final UserPreferenceManager _userPreferenceManager;
     private final EmailSender _emailSender;
-    private final Logger _logger;
 
     public UsernamePasswordForgotAccountIdRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
-        _logger = LoggerFactory.getLogger(UsernamePasswordForgotAccountIdRequestHandler.class);
         _accountManager = configuration.getAccountManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
 
@@ -94,7 +93,7 @@ public final class UsernamePasswordForgotAccountIdRequestHandler implements Auth
         }
         else
         {
-            Map<String, Object> data = new HashMap<>(1);
+            var data = new HashMap<String, Object>(1);
             data.put(ViewModelReservedKeys.USERNAME, _userPreferenceManager.getUsername());
 
             response.setResponseModel(templateResponseModel(data,
@@ -113,7 +112,7 @@ public final class UsernamePasswordForgotAccountIdRequestHandler implements Auth
     @Override
     public Optional<AuthenticationResult> post(RequestModel requestModel, Response response)
     {
-        RequestModel.Post postModel = requestModel.getPostRequestModel();
+        var postModel = requestModel.getPostRequestModel();
 
         @Nullable AccountAttributes account = _accountManager.getByEmail(postModel.getPrimaryEmail());
 
@@ -123,7 +122,7 @@ public final class UsernamePasswordForgotAccountIdRequestHandler implements Auth
         {
             response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, emailValue, Response.ResponseModelScope.ANY);
 
-            Map<String, Object> model = new HashMap<>(1);
+            var model = new HashMap<String, Object>(1);
             model.put("accountId", account.getUserName());
             Email emailToSend = new Email(model);
 
@@ -148,7 +147,7 @@ public final class UsernamePasswordForgotAccountIdRequestHandler implements Auth
         {
             RequestModel.Post requestModel = new RequestModel.Post(request);
 
-            Map<String, Object> data = new HashMap<>(1);
+            var data = new HashMap<String, Object>(1);
             data.put(ViewModelReservedKeys.FORM_POST_BACK, requestModel.dataOnError());
 
             // on POST validation failure, go back to the GET template

@@ -17,10 +17,10 @@
 package io.curity.identityserver.plugin.usernamepassword.forgotPassword;
 
 import com.google.common.html.HtmlEscapers;
-import io.curity.identityserver.plugin.usernamepassword.utils.StringUtils;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
+import org.apache.commons.lang3.StringUtils;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.web.Request;
@@ -84,7 +84,7 @@ public final class RequestModel
 
         Map<String, Object> dataOnError()
         {
-            Map<String, Object> data = new HashMap<>(3);
+            var data = new HashMap<String, Object>(2);
             data.put(USERNAME_PARAM, _username == null ? "" : HtmlEscapers.htmlEscaper().escape(_username));
             data.put(PRIMARY_EMAIL_PARAM, _email == null ? "" : HtmlEscapers.htmlEscaper().escape(_email));
             return data;

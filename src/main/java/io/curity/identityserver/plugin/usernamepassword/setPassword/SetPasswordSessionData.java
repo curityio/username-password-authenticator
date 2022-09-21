@@ -17,7 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
 import com.google.gson.Gson;
-import io.curity.identityserver.plugin.usernamepassword.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import se.curity.identityserver.sdk.attribute.Attribute;
 import se.curity.identityserver.sdk.service.SessionManager;
 

@@ -78,7 +78,7 @@ public final class RequestModel
 
         Map<String, Object> dataOnError()
         {
-            Map<String, Object> data = new HashMap<>(2);
+            var data = new HashMap<String, Object>(1);
             data.put(USERNAME_PARAM, _userName == null ? "" : HtmlEscapers.htmlEscaper().escape(_userName));
             return data;
         }

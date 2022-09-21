@@ -145,7 +145,7 @@ public final class RequestModel
 
         public Map<String, Object> dataOnError()
         {
-            Map<String, Object> data = new HashMap<>(5);
+            var data = new HashMap<String, Object>(5);
             data.put(KEY_USERNAME, _userName == null ? "" : HtmlEscapers.htmlEscaper().escape(_userName));
             data.put(KEY_GIVEN_NAME, _firstName == null ? "" : HtmlEscapers.htmlEscaper().escape(_firstName));
             data.put(KEY_FAMILY_NAME, _lastName == null ? "" : HtmlEscapers.htmlEscaper().escape(_lastName));

@@ -36,7 +36,6 @@ import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
@@ -44,13 +43,13 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
 public class UsernamePasswordActivateAndSetPasswordRequestHandler
         implements AnonymousRequestHandler<ActivateAndSetPasswordRequestModel>
 {
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordActivateAndSetPasswordRequestHandler.class);
 
     private static final String USER_TO_SET_PASSWORD_FOR = "USER_TO_SET_PASSWORD_FOR";
     private final AccountManager _accountManager;
     private final SessionManager _sessionManager;
     private final CredentialManager _credentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
-    private final Logger _logger;
 
     public UsernamePasswordActivateAndSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
@@ -58,7 +57,6 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
         _sessionManager = configuration.getSessionManager();
         _credentialManager = configuration.getCredentialManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
-        _logger = LoggerFactory.getLogger(UsernamePasswordActivateAndSetPasswordRequestHandler.class);
     }
 
     @Override
@@ -88,7 +86,7 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
     @Override
     public Void get(ActivateAndSetPasswordRequestModel requestModel, Response response)
     {
-        ActivateAndSetPasswordRequestModel.Get model = requestModel.getGetRequestModel();
+        var model = requestModel.getGetRequestModel();
 
         String tokenAsString = model.getToken();
         ActivationResult activationResult = _accountManager.activateAccount(tokenAsString);
@@ -103,7 +101,7 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             response.setHttpStatus(HttpStatus.BAD_REQUEST);
             response.addErrorMessage(ErrorMessage.withMessage("validation.error.token.invalid"));
 
-            String activateAccountUrl = String.format("%s/activate",
+            var activateAccountUrl = String.format("%s/activate",
                     _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
             response.putViewData(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl, HttpStatus.BAD_REQUEST);
         }
@@ -115,7 +113,7 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
     @Nullable
     public Void post(ActivateAndSetPasswordRequestModel requestModel, Response response)
     {
-        ActivateAndSetPasswordRequestModel.Post model = requestModel.getPostRequestModel();
+        var model = requestModel.getPostRequestModel();
         String password = model.getPassword();
 
         AccountAttributes account = getUserAccountFromSession();
@@ -159,10 +157,10 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
 
     private void setNoSessionResponse(ActivateAndSetPasswordRequestModel.Post requestModel, Response response)
     {
-        String activateAccountUrl = String.format("%s/activate",
+        var activateAccountUrl = String.format("%s/activate",
                 _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
 
-        Map<String, Object> data = new HashMap<>(1);
+        var data = new HashMap<String, Object>(1);
         data.put(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl);
 
         response.setResponseModel(templateResponseModel(data,

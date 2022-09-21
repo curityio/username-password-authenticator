@@ -29,23 +29,22 @@ import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 public class UsernamePasswordActivateAccountLandingRequestHandler implements AnonymousRequestHandler<ActivateAccountRequestModel>
 {
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordActivateAccountLandingRequestHandler.class);
+
     private final AccountManager _accountManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final ExceptionFactory _exceptionFactory;
-    private final Logger _logger;
 
     public UsernamePasswordActivateAccountLandingRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
         _exceptionFactory = configuration.getExceptionFactory();
-        _logger = LoggerFactory.getLogger(UsernamePasswordActivateAccountLandingRequestHandler.class);
     }
 
     @Override
@@ -62,13 +61,13 @@ public class UsernamePasswordActivateAccountLandingRequestHandler implements Ano
     @Override
     public Void get(ActivateAccountRequestModel requestModel, Response response)
     {
-        ActivateAccountRequestModel.Get model = requestModel.getGetRequestModel();
+        var model = requestModel.getGetRequestModel();
 
-        String destinationUrl = String.format("%s/%s",
+        var destinationUrl = String.format("%s/%s",
                 _authenticatorInformationProvider.getFullyQualifiedAnonymousUri(),
                 _accountManager.isSetPasswordAfterActivation() ? "activate-and-set" : "activate");
 
-        Map<String, Object> data = new HashMap<>(2);
+        var data = new HashMap<String, Object>(2);
         data.put(ViewModelReservedKeys.ACTION, destinationUrl);
         data.put("formParameters", model.asMap());
 

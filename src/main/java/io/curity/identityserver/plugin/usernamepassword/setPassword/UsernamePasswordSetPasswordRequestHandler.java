@@ -17,7 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
-import io.curity.identityserver.plugin.usernamepassword.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
@@ -30,7 +30,6 @@ import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
-import se.curity.identityserver.sdk.service.ExceptionFactory;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.web.Request;
@@ -44,11 +43,12 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
 
 public final class UsernamePasswordSetPasswordRequestHandler implements AnonymousRequestHandler<RequestModel>
 {
+    private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordSetPasswordRequestHandler.class);
+
     private final NonceTokenIssuer _nonceTokenIssuer;
     private final SessionManager _sessionManager;
     private final AccountManager _accountManager;
     private final CredentialManager _credentialManager;
-    private final Logger _logger;
 
     public UsernamePasswordSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
@@ -56,7 +56,6 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         _sessionManager = configuration.getSessionManager();
         _accountManager = configuration.getAccountManager();
         _credentialManager = configuration.getCredentialManager();
-        _logger = LoggerFactory.getLogger(UsernamePasswordSetPasswordRequestHandler.class);
     }
 
     @Override
@@ -85,7 +84,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     @Override
     public Void get(RequestModel requestModel, Response response)
     {
-        RequestModel.Get model = requestModel.getGetRequestModel();
+        var model = requestModel.getGetRequestModel();
 
         String token = model.getToken();
         if (validateToken(token))
@@ -99,7 +98,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     @Override
     public Void post(RequestModel requestModel, Response response)
     {
-        RequestModel.Post model = requestModel.getPostRequestModel();
+        var model = requestModel.getPostRequestModel();
 
         UpdatePasswordResult result;
         try
@@ -131,7 +130,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     private boolean validateToken(String token) {
 
         // This prevents an error if the page is refreshed after the nonce has been introspected
-        SetPasswordSessionData sessionData = new SetPasswordSessionData(_sessionManager);
+        var sessionData = new SetPasswordSessionData(_sessionManager);
         if (sessionData.hasToken(token))
         {
             _logger.trace("Nonce was found in the session");
@@ -170,7 +169,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
 
     private UpdatePasswordResult updatePassword(String password)
     {
-        SetPasswordSessionData sessionData = new SetPasswordSessionData(_sessionManager);
+        var sessionData = new SetPasswordSessionData(_sessionManager);
         String accountId = sessionData.readAccountId();
         if (accountId == null)
         {

@@ -80,7 +80,7 @@ public class ActivateAccountRequestModel {
 
         public Map<String, Object> asMap()
         {
-            Map<String, Object> data = new HashMap<>(1);
+            var data = new HashMap<String, Object>(1);
             data.put(TOKEN_PARAM, getToken());
             return data;
         }

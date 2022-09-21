@@ -46,7 +46,7 @@ Then update the `pom.xml` file of this project with matching versions.
 
 ### Build the JAR Files
 
-Ensure that JDK 8 or later is installed, and also the [maven build tool](https://maven.apache.org/install.html).\
+Ensure that JDK 11 or later is installed, and also the [maven build tool](https://maven.apache.org/install.html).\
 Then build the plugin code with this command:
 
 ```bash
