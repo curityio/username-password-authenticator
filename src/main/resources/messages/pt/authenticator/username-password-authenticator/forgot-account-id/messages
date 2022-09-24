@@ -1,13 +1,13 @@
-meta.title=Forgot Username
-page.title=Forgot Username
-view.head1=Forgot your username?
-view.p1=Enter the email address you gave us when you signed up, and we'll send you an email with the username.
+meta.title=Esqueci o nome de usuário
+page.title=Esqueci o nome de usuário
+view.head1=Esqueceu seu nome de usuário?
+view.p1=Digite o endereço de e-mail que você nos forneceu ao se inscreveu e nós lhe enviaremos um e-mail com o nome de usuário.
 view.email=E-mail
-view.button=Send my username
-view.cancel=Cancel
-view.success.head1=Check your inbox!
-view.success.p1=An email has been sent to you with your username
-view.back.to.login=Take me back to the login page
+view.button=Enviar meu nome de usuário
+view.cancel=Cancelar
+view.success.head1=Verifique sua caixa de entrada!
+view.success.p1=Um e-mail foi enviado a você com seu nome de usuário
+view.back.to.login=Leve-me de volta para a página de login
 
-validation.error.email.required=You have to enter your email address
-validation.error.email.invalid=The email address you entered is not valid
+validation.error.email.required=Você tem que digitar seu endereço de e-mail
+validation.error.email.invalid=O endereço de e-mail que você inseriu não é válido

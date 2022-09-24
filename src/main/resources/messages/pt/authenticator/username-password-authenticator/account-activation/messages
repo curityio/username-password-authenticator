@@ -1,27 +1,27 @@
-meta.title=Activate Account
-page.title=Activate Account
-view.title1=Thank you!
-view.paragraph1=Your account has been activated
-view.back.to.login=Take me back to the login page
+meta.title=Ativar conta
+page.title=Ativar conta
+view.title1=Obrigado!
+view.paragraph1=Sua conta foi ativada
+view.back.to.login=Leve-me de volta para a página de login
 
-view.error.head1=An error occurred
-view.set-password.head=Confirm your account by setting your password
-view.error.p1=Your account has not been activated
-view.newPassword=Choose a password
+view.error.head1=Ocorreu um erro
+view.set-password.head=Confirme sua conta definindo uma senha
+view.error.p1=Sua conta não foi ativada
+view.newPassword=Escolha uma senha
 
-validation.error.token.invalid=Invalid link. Note that account activation links are only valid for a short period of time.
-validation.error.token.required=Missing token.
-validation.error.email.invalid=Invalid email address.
-validation.error.missing-email-or-phone=Please fill in your email address.
-validation.error.password.required=You must enter a password
-validation.error.password.weak=Password not strong enough
+validation.error.token.invalid=Link inválido. Observe que os links de ativação de conta são válidos apenas por um curto período de tempo.
+validation.error.token.required=Token ausente.
+validation.error.email.invalid=Endereço de e-mail inválido.
+validation.error.missing-email-or-phone=Preencha seu endereço de e-mail.
+validation.error.password.required=Você deve digitar uma senha
+validation.error.password.weak=A senha não é forte o suficiente
 
-view.newToken.head1=Send a new activation email
-view.newToken.p1=Enter the email address you gave when you created your account and new activation email will be sent to you.
+view.newToken.head1=Enviar um novo e-mail de ativação
+view.newToken.p1=Digite o endereço de e-mail que você forneceu quando criou sua conta e um novo e-mail de ativação será enviado a você.
 view.newToken.email=E-mail
-view.newToken.button=Send new activation email
+view.newToken.button=Enviar novo e-mail de ativação
 
-view.newTokenSent.h1=A new activation email has been sent
-view.newTokenSent.p1=An e-mail with an activation link has been sent to you.
+view.newTokenSent.h1=Um novo e-mail de ativação foi enviado
+view.newTokenSent.p1=Um e-mail com um link de ativação foi enviado a você.
 
-view.button=Activate
+view.button=Ativar

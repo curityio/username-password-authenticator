@@ -1,4 +1,4 @@
-email.subject=Reset your password
-email.title=Forgot Password
-email.head1=Click the button below to reset your password
-email.button=Reset Password
+email.subject=Redefinir sua senha
+email.title=Esqueci minha senha
+email.head1=Clique no botão abaixo para redefinir sua senha
+email.button=Redefinir senha
