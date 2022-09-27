@@ -36,6 +36,8 @@
 ## The title of this page can be overridden by setting the $title variable here to a resource string or the actual value
 ##set($title = "")
 
+#set ($logo_email_path = $_baseUrl + '/assets/images/example-logo.png')
+
 #define($_body)
     <p>#message("authenticator.username-password-authenticator.email.verify-account.email.head1")</p>
     <a style="-webkit-font-smoothing: antialiased;transition: all .3s ease;border-radius: 8px;background: #323c53; font-weight: 400;
