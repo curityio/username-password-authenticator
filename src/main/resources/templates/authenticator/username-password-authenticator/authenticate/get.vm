@@ -70,7 +70,7 @@
                 "${_templatePrefix}.view.forgot-account-id")</a>
             
         </div>
-        #if ($_registerUrl)
+        #if ($_registrationEnabled)
             <div class="sm-col-12 center">
                 <a href="$_registerUrl" class="mt2">
                     <i class="icon ion-android-person-add"></i>

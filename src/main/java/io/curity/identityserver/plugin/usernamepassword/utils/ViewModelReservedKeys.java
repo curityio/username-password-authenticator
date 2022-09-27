@@ -9,7 +9,7 @@ public class ViewModelReservedKeys {
     public static final String FORM_POST_BACK = "_postBack";
 
     // Used to the registration endpoint, or null if it should not be shown
-    public static final String REGISTER_ENDPOINT = "_registerUrl";
+    public static final String REGISTRATION_ENABLED = "_registrationEnabled";
 
     // The URL to the activation endpoint
     public static final String ACTIVATION_ENDPOINT = "_activationUrl";

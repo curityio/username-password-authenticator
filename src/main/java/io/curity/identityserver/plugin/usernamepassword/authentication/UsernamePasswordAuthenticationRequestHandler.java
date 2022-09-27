@@ -74,17 +74,10 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     public RequestModel preProcess(Request request, Response response)
     {
         var data = new HashMap<String, Object>(2);
-
-        boolean isRegistrationDisabled = (_accountManager == null || !_accountManager.supportsRegistration());
         data.put(ViewModelReservedKeys.USERNAME, _userPreferenceManager.getUsername());
-        if (isRegistrationDisabled)
-        {
-            data.put(ViewModelReservedKeys.REGISTER_ENDPOINT, null);
-        }
-        else
-        {
-            data.put(ViewModelReservedKeys.REGISTER_ENDPOINT, _authenticatorInformationProvider.getFullyQualifiedRegistrationUri());
-        }
+
+        boolean isRegistrationEnabled = (_accountManager != null && _accountManager.supportsRegistration());
+        data.put(ViewModelReservedKeys.REGISTRATION_ENABLED, isRegistrationEnabled);
 
         // set the template and model for responses on the NOT_FAILURE scope
         response.setResponseModel(templateResponseModel(
