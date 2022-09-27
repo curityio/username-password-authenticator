@@ -68,6 +68,7 @@
               <html-form xmlns="https://curity.se/ns/conf/authenticators/html-form">
                 <account-manager>default-account-manager</account-manager>
                 <credential-manager>default-credential-manager</credential-manager>
+                <email-provider>smtp</email-provider>
               </html-form>
             </authenticator>
             <authenticator>

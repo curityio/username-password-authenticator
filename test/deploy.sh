@@ -21,7 +21,7 @@ fi
 #
 # This is used by Curity developers to prevent checkins of license files
 #
-cp ../hooks/pre-commit ./.git/hooks
+cp ./hooks/pre-commit ./.git/hooks
 
 #
 # Start ngrok if required, and use 'kill -9 $(pgrep ngrok)' to
