@@ -22,7 +22,7 @@ fi
 #
 # Create a custom Docker image
 #
-docker build -f test/Dockerfile -t custom_curity_idsvr:7.3.1 .
+docker build -f test/Dockerfile -t custom_curity_idsvr:7.4.0 .
 if [ $? -ne 0 ]; then
   echo 'Problem encountered building the Identity Server custom docker image'
   exit 1

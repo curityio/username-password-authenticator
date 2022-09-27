@@ -1,4 +1,4 @@
-FROM curity.azurecr.io/curity/idsvr:7.3.1
+FROM curity.azurecr.io/curity/idsvr:7.4.0
 
 # Copy in the plugin and the dependencies not available in the SDK
 RUN mkdir -p /opt/idsvr/usr/share/plugins/usernamepassword

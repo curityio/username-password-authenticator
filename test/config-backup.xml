@@ -19,6 +19,10 @@
             <value>img-src 'self' data:;</value>
           </template-variables>
           <template-variables>
+            <name>_configured_logo_email_path</name>
+            <value>#{RUNTIME_BASE_URL}/assets/images/example-logo.png</value>
+          </template-variables>
+          <template-variables>
             <name>_configured_logo_inside</name>
             <value>true</value>
           </template-variables>
