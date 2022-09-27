@@ -347,6 +347,7 @@
                 <redirect-uris>https://oauth.tools/callback/code</redirect-uris>
                 <scope>openid</scope>
                 <user-authentication>
+                  <allowed-authenticators>htmlform</allowed-authenticators>
                   <allowed-authenticators>usernamepassword</allowed-authenticators>
                   <allowed-post-logout-redirect-uris>https://oauth.tools</allowed-post-logout-redirect-uris>
                 </user-authentication>
