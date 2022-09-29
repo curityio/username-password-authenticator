@@ -1,0 +1,27 @@
+meta.title=Ativar conta
+page.title=Ativar conta
+view.title1=Obrigado!
+view.paragraph1=Sua conta foi ativada
+view.back.to.login=Leve-me de volta para a página de login
+
+view.error.head1=Ocorreu um erro
+view.set-password.head=Confirme sua conta definindo uma senha
+view.error.p1=Sua conta não foi ativada
+view.newPassword=Escolha uma senha
+
+validation.error.token.invalid=Link inválido. Observe que os links de ativação de conta são válidos apenas por um curto período de tempo.
+validation.error.token.required=Token ausente.
+validation.error.email.invalid=Endereço de e-mail inválido.
+validation.error.missing-email-or-phone=Preencha seu endereço de e-mail.
+validation.error.password.required=Você deve digitar uma senha
+validation.error.password.weak=A senha não é forte o suficiente
+
+view.newToken.head1=Enviar um novo e-mail de ativação
+view.newToken.p1=Digite o endereço de e-mail que você forneceu quando criou sua conta e um novo e-mail de ativação será enviado a você.
+view.newToken.email=E-mail
+view.newToken.button=Enviar novo e-mail de ativação
+
+view.newTokenSent.h1=Um novo e-mail de ativação foi enviado
+view.newTokenSent.p1=Um e-mail com um link de ativação foi enviado a você.
+
+view.button=Ativar

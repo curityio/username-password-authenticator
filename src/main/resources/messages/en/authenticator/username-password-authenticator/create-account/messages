@@ -16,7 +16,7 @@ view.terms=I agree to the terms of service
 view.success.further-instructions=Further instructions have been emailed to your address
 view.success.success=Your account has been created!
 view.success.verify=An e-mail with a verification link has been sent to you.
-view.success.no-activation=Your can now proceed to the login page
+view.success.no-activation=You can now proceed to the login page
 
 view.success.spam-folder=If you did not receive an email, check your spam folder.
 view.success.return-to-login=Return to login

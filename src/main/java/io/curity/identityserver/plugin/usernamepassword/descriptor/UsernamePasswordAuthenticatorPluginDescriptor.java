@@ -16,17 +16,24 @@
 
 package io.curity.identityserver.plugin.usernamepassword.descriptor;
 
-import io.curity.identityserver.plugin.usernamepassword.authentication.UsernamePasswordAuthenticatorRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.activateAccount.UsernamePasswordActivateAccountLandingRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.activateAccount.UsernamePasswordActivateAccountRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.activateAccount.UsernamePasswordActivateAndSetPasswordRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.authentication.UsernamePasswordAuthenticationRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
+import io.curity.identityserver.plugin.usernamepassword.forgotAccountId.UsernamePasswordForgotAccountIdRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.forgotPassword.UsernamePasswordForgotPasswordRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.registration.UsernamePasswordRegistrationRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.setPassword.UsernamePasswordSetPasswordRequestHandler;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
 import se.curity.identityserver.sdk.plugin.descriptor.AuthenticatorPluginDescriptor;
+import se.curity.identityserver.sdk.web.RequestHandlerSet;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
 /**
@@ -51,18 +58,38 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
     @Override
     public Map<String, Class<? extends AuthenticatorRequestHandler<?>>> getAuthenticationRequestHandlerTypes()
     {
-        return singletonMap("index", UsernamePasswordAuthenticatorRequestHandler.class);
+        return new HashMap<String, Class<? extends AuthenticatorRequestHandler<?>>>() {{
+            put("index", UsernamePasswordAuthenticationRequestHandler.class);
+            put("forgot-password", UsernamePasswordForgotPasswordRequestHandler.class);
+            put("forgot-account-id", UsernamePasswordForgotAccountIdRequestHandler.class);
+        }};
     }
 
     @Override
     public Map<String, Class<? extends AnonymousRequestHandler<?>>> getAnonymousRequestHandlerTypes()
     {
-        return emptyMap();
+        return new HashMap<String, Class<? extends AnonymousRequestHandler<?>>>() {{
+            put("set-password", UsernamePasswordSetPasswordRequestHandler.class);
+            put("activate-account", UsernamePasswordActivateAccountLandingRequestHandler.class);
+            put("activate", UsernamePasswordActivateAccountRequestHandler.class);
+            put("activate-and-set", UsernamePasswordActivateAndSetPasswordRequestHandler.class);
+        }};
     }
 
     @Override
     public Map<String, Class<? extends RegistrationRequestHandler<?>>> getRegistrationRequestHandlerTypes()
     {
         return singletonMap("index", UsernamePasswordRegistrationRequestHandler.class);
+    }
+
+    @Override
+    public RequestHandlerSet allowedHandlersForCrossSiteNonSafeRequests()
+    {
+        // Allowing the set password handlers to be accessed by a cross-site
+        // so that a proper error message is returned, including the ability to generate a new link,
+        // when session is not available.
+        return RequestHandlerSet.of(
+                UsernamePasswordSetPasswordRequestHandler.class,
+                UsernamePasswordActivateAndSetPasswordRequestHandler.class);
     }
 }

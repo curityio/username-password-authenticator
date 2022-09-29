@@ -16,47 +16,49 @@
 
 package io.curity.identityserver.plugin.usernamepassword.registration;
 
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotBlank;
+import com.google.common.html.HtmlEscapers;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import org.apache.commons.lang3.RandomStringUtils;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.web.Request;
 
-import javax.validation.Valid;
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * Request model for the {@link UsernamePasswordRegistrationRequestHandler}.
  * <p>
- * It creates a nested {@link HtmlFormRegistrationRequestModel} and validates it in case the
+ * It creates a nested {@link RegistrationRequestModel} and validates it in case the
  * received request uses the POST method, otherwise nothing is validated.
  */
 public final class RequestModel
 {
-
     @Valid
     @Nullable
-    private final HtmlFormRegistrationRequestModel _postRequestModel;
+    private final RegistrationRequestModel _postRequestModel;
 
-    RequestModel(Request request)
+    RequestModel(Request request, boolean isUsernameAsEmail, boolean isSetPasswordAfterActivation)
     {
         _postRequestModel = request.isPostRequest() ?
-                new HtmlFormRegistrationRequestModel(request) :
+                new RegistrationRequestModel(request, isUsernameAsEmail, isSetPasswordAfterActivation) :
                 null;
     }
 
     /**
      * @return the POST request model. Only call this method if the request is a POST request.
      */
-    HtmlFormRegistrationRequestModel getPostRequestModel()
+    RegistrationRequestModel getPostRequestModel()
     {
         return Optional.ofNullable(_postRequestModel).orElseThrow(() ->
                 new RuntimeException("POST Request Model does not exist"));
     }
 
-    static class HtmlFormRegistrationRequestModel
+    static class RegistrationRequestModel
     {
-
         private static final String KEY_USERNAME = "userName";
         private static final String KEY_PRIMARY_EMAIL = "primaryEmail";
         private static final String KEY_PRIMARY_PHONE_NUMBER = "primaryPhoneNumber";
@@ -83,29 +85,44 @@ public final class RequestModel
         @Nullable
         private final String _lastName;
 
-        HtmlFormRegistrationRequestModel(Request request)
+        RegistrationRequestModel(Request request, boolean isUsernameAsEmail, boolean isSetPasswordAfterActivation)
         {
             _userName = request.getFormParameterValueOrError(KEY_USERNAME);
-            _primaryEmail = request.getFormParameterValueOrError(KEY_PRIMARY_EMAIL);
+
+            // Default the email to the username with this option
+            if (isUsernameAsEmail) {
+                _primaryEmail = _userName;
+            }
+            else {
+                _primaryEmail = request.getFormParameterValueOrError(KEY_PRIMARY_EMAIL);
+            }
+
             _primaryPhoneNumber = request.getFormParameterValueOrError(KEY_PRIMARY_PHONE_NUMBER);
-            _password = request.getFormParameterValueOrError(KEY_PASSWORD);
+
             _firstName = request.getFormParameterValueOrError(KEY_GIVEN_NAME);
             _lastName = request.getFormParameterValueOrError(KEY_FAMILY_NAME);
+
+            // Default the password to a value the user will not know
+            if (isSetPasswordAfterActivation) {
+                _password = createRandomPassword(16);
+            } else {
+                _password = request.getFormParameterValueOrError(KEY_PASSWORD);
+            }
         }
 
         public String getUserName()
         {
-            return Optional.ofNullable(_userName).orElseThrow(missingValueOf(KEY_USERNAME));
+            return _userName;
         }
 
         public String getPassword()
         {
-            return Optional.ofNullable(_password).orElseThrow(missingValueOf(KEY_PASSWORD));
+            return _password;
         }
 
         public String getPrimaryEmail()
         {
-            return Optional.ofNullable(_primaryEmail).orElseThrow(missingValueOf(KEY_PRIMARY_EMAIL));
+            return _primaryEmail;
         }
 
         @Nullable
@@ -126,11 +143,21 @@ public final class RequestModel
             return _lastName;
         }
 
-        private static Supplier<RuntimeException> missingValueOf(String parameterName)
+        public Map<String, Object> dataOnError()
         {
-            return () -> new RuntimeException(String.format("Value of '%s' is missing", parameterName));
+            var data = new HashMap<String, Object>(5);
+            data.put(KEY_USERNAME, _userName == null ? "" : HtmlEscapers.htmlEscaper().escape(_userName));
+            data.put(KEY_GIVEN_NAME, _firstName == null ? "" : HtmlEscapers.htmlEscaper().escape(_firstName));
+            data.put(KEY_FAMILY_NAME, _lastName == null ? "" : HtmlEscapers.htmlEscaper().escape(_lastName));
+            data.put(KEY_PRIMARY_EMAIL, _primaryEmail == null ? "" : HtmlEscapers.htmlEscaper().escape(_primaryEmail));
+            data.put(KEY_PRIMARY_PHONE_NUMBER, _primaryPhoneNumber == null ? "" : HtmlEscapers.htmlEscaper().escape(_primaryPhoneNumber));
+            return data;
         }
 
-    }
+        private String createRandomPassword(int length) {
 
+            // Call RandomStringUtils.randomAscii(16) with a SecureRandom object
+            return RandomStringUtils.random(length, 32, 127, false, false, null, new SecureRandom());
+        }
+    }
 }

@@ -1,0 +1,15 @@
+meta.title=Definir senha
+page.title=Definir senha
+view.head1=Definir senha
+view.newPassword=Nova senha
+view.repeatNewPassword=Repita a nova senha
+view.button=Atualizar senha
+view.cancel=Cancelar
+view.success.head1=Sua senha foi redefinida
+view.back.to.login=Leve-me de volta para a página de login
+
+validation.error.token.invalid=Link inválido. Observe que os links são válidos apenas por um curto período de tempo.
+validation.error.token.required=Token ausente
+validation.error.password.required=Você precisa digitar uma nova senha
+validation.error.password.mismatch=Suas senhas não correspondem
+validation.error.password.weak=A senha não é forte o suficiente

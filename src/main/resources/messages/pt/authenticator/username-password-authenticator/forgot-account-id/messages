@@ -1,0 +1,13 @@
+meta.title=Esqueci o nome de usuário
+page.title=Esqueci o nome de usuário
+view.head1=Esqueceu seu nome de usuário?
+view.p1=Digite o endereço de e-mail que você nos forneceu ao se inscreveu e nós lhe enviaremos um e-mail com o nome de usuário.
+view.email=E-mail
+view.button=Enviar meu nome de usuário
+view.cancel=Cancelar
+view.success.head1=Verifique sua caixa de entrada!
+view.success.p1=Um e-mail foi enviado a você com seu nome de usuário
+view.back.to.login=Leve-me de volta para a página de login
+
+validation.error.email.required=Você tem que digitar seu endereço de e-mail
+validation.error.email.invalid=O endereço de e-mail que você inseriu não é válido

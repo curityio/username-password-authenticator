@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+
+  curity-idsvr:
+    image: custom_curity_idsvr:7.4.0
+    ports:
+     - 6749:6749
+     - 8443:8443
+    volumes:
+     - ./license.json:/opt/idsvr/etc/init/license/license.json
+     - ./config-backup.xml:/opt/idsvr/etc/init/config.xml
+     - ./example-logo.png:/opt/idsvr/usr/share/webroot/assets/images/example-logo.png
+    environment:
+      PASSWORD: 'Password1'
+      LOGGING_LEVEL: 'INFO'
+      RUNTIME_BASE_URL: "${RUNTIME_BASE_URL}"

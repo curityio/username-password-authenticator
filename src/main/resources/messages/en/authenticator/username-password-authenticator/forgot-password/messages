@@ -1,0 +1,18 @@
+meta.title=Forgot Password
+page.title=Forgot Password
+view.head1=Forgot password?
+view.p1=Enter the email address or username you gave us when you signed up, and we'll send you an email with a link to reset the password.
+view.email=Email
+view.username=Username
+view.or=or
+view.button=Send reset link
+view.cancel=Return to login page
+view.success.success=Success!
+view.success.further-instructions=Further instructions have been emailed the following email address:
+view.success.email-sent=Email sent. Click the link in the email to create a new password.
+view.success.no-email=No email after 15 minutes?
+view.success.check-your-spam-folder=Check your spam folder
+view.success.return-to-login=Return to login page
+
+error.email.or.accountId.required=You have to enter your email or your username
+error.email.invalid=Please enter a valid email address

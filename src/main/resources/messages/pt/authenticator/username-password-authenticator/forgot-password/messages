@@ -1,0 +1,18 @@
+meta.title=Esqueci minha senha
+page.title=Esqueci minha senha
+view.head1=Esqueceu a senha?
+view.p1=Insira o endereço de e-mail ou nome de usuário que você nos forneceu ao se inscrever e nós lhe enviaremos um e-mail com um link para redefinir a senha.
+view.email=E-mail
+view.username=Nome de usuário
+view.or=ou
+view.button=Enviar link de redefinição
+view.cancel=Retornar à página de login
+view.success.success=Sucesso!
+view.success.further-instructions=Outras instruções foram enviadas por e-mail para o seguinte endereço
+view.success.email-sent=E-mail enviado. Clique no link no e-mail para criar uma nova senha.
+view.success.no-email=Nenhum e-mail após 15 minutos?
+view.success.check-your-spam-folder=Verifique sua pasta de spam
+view.success.return-to-login=Retornar à página de login
+
+error.email.or.accountId.required=Você precisa digitar seu e-mail ou seu nome de usuário
+error.email.invalid=Insira um endereço de e-mail válido
