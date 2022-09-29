@@ -5,9 +5,9 @@ The user must then enter their email address and will receive a reset password l
 
 ## Overview
 
-This is a two part flow that includes the use of one time tokens:
+This is a two-part flow that includes the use of one time tokens:
 
-- The forgot password flow generates a reset password link and is described here
+- The forgot password flow generates a reset password link and is described in this document
 - The [set password](set-password.md) flow runs when the link is clicked
 
 ## Prerequisites
@@ -48,7 +48,7 @@ An email will then be received that provides the reset password link:
 
 ## Technical Behavior
 
-The forgot password flow generates a one time token, or nonce.\
+The forgot password flow generates a one time token, or `nonce`.\
 This is included in the above email as a query parameter for the reset password URL.\
 The token and the account ID are then saved in session data, to the configured data source.
 

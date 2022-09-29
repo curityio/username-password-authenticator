@@ -1,7 +1,7 @@
 # Authentication Flow
 
 This summary walks through the screens and code paths for the entry point authentication flow.\
-As well as managing sign in, this also links to sign up and account recovery operations.
+As well as managing signing in, this also links to signup and account recovery operations.
 
 ## Initial Screen
 
@@ -18,13 +18,13 @@ The behavior of the Username Password Authenticator is influenced by Account Man
 
 | Setting | Behavior |
 | ------- | -------- |
-| Username is email | When configured, the user must enter their email address when signing in. This makes the value easy for users to remember, but this may not be supoorted for some data sources. |
+| Username is email | When configured, the user must enter their email address when signing in. This makes the value easy for users to remember, but this may not be supported for some data sources. |
 | Enable Registration | This enables new users to sign themselves up, or can be deselected when this should not be allowed. In the latter case the `Create Account` link will not be shown. |
 
 ## Links to Other Operations
 
 In some cases the user may need to perform another action before they are able to authenticate.\
-The authentication page therefore provides links to these flows:
+The authentication page therefore provides links to these flows, though Create Account may be hidden:
 
 - [Create Account](create-account.md)
 - [Forgot Username](forgot-username.md)
@@ -32,9 +32,8 @@ The authentication page therefore provides links to these flows:
 
 ## Username Behavior
 
-The username will be restored if found in the username cookie, such as after creating an account.\
-When the username is restored, the browser will typically autofill the password.\
-On subsequent login attempts, if the username is edited, it overrides the value from user preferences.
+If the username is found in the username server-side cookie, it will be restored, otherwise it will be blank.\
+If the password has been previously saved by the user, the browser will autofill it, otherwise it will be blank.
 
 ## Input Validation
 
@@ -46,7 +45,7 @@ If invalid credentials are entered, the screen is not submitted and the user mus
 
 After authentication, a username cookie is written by the user preferences manager.\
 The browser may also prompt the user to save their password.\
-If accepted then password autofill will work on subsequent logins.
+If accepted, then password autofill will work on subsequent logins.
 
 ## Code Behavior
 

@@ -18,7 +18,7 @@ The page is invoked via a GET request to a URL such as `/authn/authentication/fo
 
 ## Input Validation
 
-The input is only accepted the value entered is a valid email regular expression.\
+The input is only accepted if the value entered is a valid email regular expression.\
 Non-existing and existing values are both accepted, as a best security practice.
 
 ## After Submission

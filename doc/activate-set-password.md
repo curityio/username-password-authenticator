@@ -6,7 +6,11 @@ It is a two part flow that includes the use of one time tokens:
 - The [Create Account](create-account.md) sends an activate account email
 - The activate account flow runs when the link is clicked
 
-There are two ways to configure account activation, and this page describes the second method.\
+There are two ways to configure account activation and this page describes the second of these:
+
+- The user clicks an email link
+- Or the user clicks an email link then enters their password
+
 The first method is described in the [Activate Account](activate-account.md) page.
 
 ## Technical Behavior

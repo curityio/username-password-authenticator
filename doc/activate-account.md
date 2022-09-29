@@ -1,12 +1,16 @@
 # Activate Account Flow
 
 This flow is used when a user creates an account and then needs to verify their email address.\
-It is a two part flow that includes the use of one time tokens:
+It is a two-part flow that includes the use of one time tokens:
 
 - The [Create Account](create-account.md) sends an activate account email
 - The activate account flow runs when the link is clicked
 
-There are two ways to configure account activation, and this page describes the first method.\
+There are two ways to configure account activation and this page describes the first of these:
+
+- The user clicks an email link
+- Or the user clicks an email link then enters their password
+
 The second method is described in the [Activate and Set Password](activate-set-password.md) page.
 
 ## Technical Behavior
