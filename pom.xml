@@ -30,7 +30,7 @@
         <project.curityVersion>7.4.0</project.curityVersion>
         <project.slf4jVersion>1.7.25</project.slf4jVersion>
         <project.hibernateValidatorVersion>7.0.3.Final</project.hibernateValidatorVersion>
-        <project.guavaVersion>31.0.1-jre</project.guavaVersion>
+        <project.guavaVersion>32.0.0-jre</project.guavaVersion>
         <project.gsonVersion>2.9.0</project.gsonVersion>
         <project.apacheCommonsVersion>3.9</project.apacheCommonsVersion>
     </properties>
