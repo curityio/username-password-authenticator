@@ -44,9 +44,9 @@ public class CreateAccountPostRepresentationFunction implements RepresentationFu
         boolean hasAutoLogin = model.getBoolean(TEMPLATE_KEY_HAS_AUTO_LOGIN, false);
         return factory.newRegistrationStep(step -> {
             step.addMessage(MSG_SUCCESS);
-            step.addMessage(Message.ofKey("authenticator.username-password-authenticator.create-account." + model.getString("_activationMessage")));
+            step.addMessage(Message.ofKey(model.getString("_activationMessage")));
             model.getOptionalString("_activationMessageAdditionalInfo").ifPresent(messageKey ->
-                    step.addMessage(Message.ofKey("authenticator.username-password-authenticator.create-account." + messageKey))
+                    step.addMessage(Message.ofKey(messageKey))
             );
 
             step.addFormAction(
