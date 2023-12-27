@@ -16,6 +16,7 @@
 
 package io.curity.identityserver.plugin.usernamepassword.descriptor;
 
+import com.google.common.collect.ImmutableMap;
 import io.curity.identityserver.plugin.usernamepassword.activateAccount.UsernamePasswordActivateAccountLandingRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.activateAccount.UsernamePasswordActivateAccountRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.activateAccount.UsernamePasswordActivateAndSetPasswordRequestHandler;
@@ -25,9 +26,17 @@ import io.curity.identityserver.plugin.usernamepassword.forgotAccountId.Username
 import io.curity.identityserver.plugin.usernamepassword.forgotPassword.UsernamePasswordForgotPasswordRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.registration.UsernamePasswordRegistrationRequestHandler;
 import io.curity.identityserver.plugin.usernamepassword.setPassword.UsernamePasswordSetPasswordRequestHandler;
+import io.curity.identityserver.plugin.usernamepassword.templates.AuthenticateGetRepresentationFunction;
+import io.curity.identityserver.plugin.usernamepassword.templates.CreateAccountGetRepresentationFunction;
+import io.curity.identityserver.plugin.usernamepassword.templates.CreateAccountPostRepresentationFunction;
+import io.curity.identityserver.plugin.usernamepassword.templates.ForgotAccountIdGetRepresentation;
+import io.curity.identityserver.plugin.usernamepassword.templates.ForgotAccountIdPostRepresentation;
+import io.curity.identityserver.plugin.usernamepassword.templates.ForgotPasswordGetRepresentation;
+import io.curity.identityserver.plugin.usernamepassword.templates.ForgotPasswordPostRepresentation;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
+import se.curity.identityserver.sdk.haapi.RepresentationFunction;
 import se.curity.identityserver.sdk.plugin.descriptor.AuthenticatorPluginDescriptor;
 import se.curity.identityserver.sdk.web.RequestHandlerSet;
 
@@ -58,7 +67,8 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
     @Override
     public Map<String, Class<? extends AuthenticatorRequestHandler<?>>> getAuthenticationRequestHandlerTypes()
     {
-        return new HashMap<String, Class<? extends AuthenticatorRequestHandler<?>>>() {{
+        return new HashMap<String, Class<? extends AuthenticatorRequestHandler<?>>>()
+        {{
             put("index", UsernamePasswordAuthenticationRequestHandler.class);
             put("forgot-password", UsernamePasswordForgotPasswordRequestHandler.class);
             put("forgot-account-id", UsernamePasswordForgotAccountIdRequestHandler.class);
@@ -68,7 +78,8 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
     @Override
     public Map<String, Class<? extends AnonymousRequestHandler<?>>> getAnonymousRequestHandlerTypes()
     {
-        return new HashMap<String, Class<? extends AnonymousRequestHandler<?>>>() {{
+        return new HashMap<String, Class<? extends AnonymousRequestHandler<?>>>()
+        {{
             put("set-password", UsernamePasswordSetPasswordRequestHandler.class);
             put("activate-account", UsernamePasswordActivateAccountLandingRequestHandler.class);
             put("activate", UsernamePasswordActivateAccountRequestHandler.class);
@@ -91,5 +102,19 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
         return RequestHandlerSet.of(
                 UsernamePasswordSetPasswordRequestHandler.class,
                 UsernamePasswordActivateAndSetPasswordRequestHandler.class);
+    }
+
+    @Override
+    public Map<String, Class<? extends RepresentationFunction>> getRepresentationFunctions()
+    {
+        return ImmutableMap.<String, Class<? extends RepresentationFunction>>builder()
+                .put("authenticate/get", AuthenticateGetRepresentationFunction.class)
+                .put("create-account/get", CreateAccountGetRepresentationFunction.class)
+                .put("create-account/post", CreateAccountPostRepresentationFunction.class)
+                .put("forgot-account-id/get", ForgotAccountIdGetRepresentation.class)
+                .put("forgot-account-id/post", ForgotAccountIdPostRepresentation.class)
+                .put("forgot-password/get", ForgotPasswordGetRepresentation.class)
+                .put("forgot-password/post", ForgotPasswordPostRepresentation.class)
+                .build();
     }
 }
