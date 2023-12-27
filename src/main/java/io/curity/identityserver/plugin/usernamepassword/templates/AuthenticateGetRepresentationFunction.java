@@ -46,7 +46,6 @@ public class AuthenticateGetRepresentationFunction implements RepresentationFunc
     {
         String authUrl = model.getString("_authUrl");
         Optional<String> registerUrl = model.getOptionalString("_registerUrl");
-
         Optional<String> username = model.getOptionalString("_username");
 
         return factory.newAuthenticationStep(step -> {

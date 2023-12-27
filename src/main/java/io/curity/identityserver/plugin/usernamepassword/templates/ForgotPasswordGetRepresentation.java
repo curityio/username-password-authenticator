@@ -39,7 +39,6 @@ public class ForgotPasswordGetRepresentation implements RepresentationFunction
     private static final Message MSG_ACTION = Message.ofKey("view.button");
     private static final Message MSG_CANCEL = Message.ofKey("view.cancel");
 
-
     @Override
     public Representation apply(RepresentationModel model, RepresentationFactory factory)
     {

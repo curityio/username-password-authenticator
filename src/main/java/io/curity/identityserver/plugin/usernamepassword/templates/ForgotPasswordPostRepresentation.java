@@ -70,15 +70,12 @@ public class ForgotPasswordPostRepresentation implements RepresentationFunction
             // to prevent attackers phishing for valid email accounts, pretend an email was sent to some random address
             recipientOfCommunication = RandomStringUtils.random(12, true, true);
         }
-
         Set<Integer> groupsToReplaceSet = new HashSet<>(Arrays.asList(2, 5));
-
         Matcher matcher = Pattern.compile("(.*?)([^@]{1,4})(@)(.*?)([^.]{1,4})(\\.)?(.*)?").matcher(recipientOfCommunication);
 
         if (matcher.matches())
         {
             List<String> result = new ArrayList<>(matcher.groupCount());
-
             for (int i = 1; i <= matcher.groupCount(); i++)
             {
                 @Nullable String group = matcher.group(i);

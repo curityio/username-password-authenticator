@@ -39,7 +39,6 @@ public class ForgotAccountIdPostRepresentation implements RepresentationFunction
         return factory.newAuthenticationStep(step -> {
             step.addMessage(MSG_SUCCESS, HaapiContract.MessageClasses.HEADING);
             step.addMessage(MSG_INFO, HaapiContract.MessageClasses.INFO);
-
             step.addLink(
                     URI.create(model.getString("_authUrl")),
                     HaapiContract.Links.Relations.RESTART,

@@ -44,7 +44,6 @@ public class ForgotAccountIdGetRepresentation implements RepresentationFunction
 
         return factory.newAuthenticationStep(step -> {
             step.addMessage(MSG_INFO);
-
             step.addFormAction(
                     HaapiContract.Actions.Kinds.ACCOUNT_ID_RECOVERY,
                     URI.create(forgotAccountIdUrl),
@@ -52,7 +51,6 @@ public class ForgotAccountIdGetRepresentation implements RepresentationFunction
                     MediaType.X_WWW_FORM_URLENCODED,
                     MSG_FORM_TITLE, MSG_ACTION,
                     fields -> fields.addTextField("primaryEmail", MSG_LABEL_EMAIL, FieldKind.EMAIL));
-
             step.addLink(
                     URI.create(authUrl),
                     HaapiContract.Links.Relations.RESTART,
