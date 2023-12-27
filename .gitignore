@@ -7,4 +7,5 @@ buildNumber.properties
 !/.mvn/wrapper/maven-wrapper.jar
 *.iml
 .idea
+.editorconfig
 config-with-email.xml
