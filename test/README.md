@@ -59,20 +59,47 @@ From the `Facilities` menu, configure the account manager options according to y
 
 ![Account Manager](../doc/images/shared/account-manager.png)
 
-To use email features for account activation and recovery, update the email provider settings:
-
-![Email Provider](../doc/images/shared/email-provider.png)
-
 ## Test Password Flows
 
 Run a code flow from OAuth tools to perform end-to-end testing of password flows.\
 Whenever the system is deployed, select `Create Account` and register a user:
 
-![Create Account](../doc/images/create-account/initial.png)
+![Create Account](images/login.png)
+
+A mock SMTP server is provided, and you can process emails by browsing to `http://localhost:8080`:
+
+![Email Inbox](images/email-inbox.png)
 
 Activate the user if required, then test logins and account recovery behaviour:
 
 ![Authenticate](../doc/images/authentication/initial.png)
+
+## User Account and Credential Data
+
+Get a shell to the postgres Docker container:
+
+```bash
+POSTGRES_CONTAINER_ID=$(docker ps | grep postgres | awk '{print $1}')
+docker exec -it $POSTGRES_CONTAINER_ID bash
+```
+
+Then connect to the database
+
+```bash
+export PGPASSWORD=Password1 && psql -p 5432 -d idsvr -U postgres
+```
+
+Then run queries to see how users and their passwords are stored and updated:
+
+```sql
+select * from accounts;
+select * from credentials;
+```
+
+The default data source stores user accounts and credentials in separate tables.\
+Settings are managed by navigating to `Facilities / Data Sources` in the Admin UI:
+
+![Data Source](images/data-source.png)
 
 ## Free Resources
 

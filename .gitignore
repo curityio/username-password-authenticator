@@ -7,4 +7,4 @@ buildNumber.properties
 !/.mvn/wrapper/maven-wrapper.jar
 *.iml
 .idea
-config-with-email.xml
+test/data

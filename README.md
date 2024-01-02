@@ -8,14 +8,14 @@ This example plugin provides a similar implementation using the Curity SDK.
 
 ## Customization
 
-The [Website Customization Resources](https://curity.io/resources/customization/) show how to implement branding customizations.\
+The [Branding and User Experience Resources](https://curity.io/resources/branding-user-experience/) provide example customizations.\
 In more advanced scenarios you may also want to take closer control over runtime behavior.\
 For these cases, you can use this repo as a starting point and adapt it as required.
 
 ## Example Deployment
 
-An [example deployment](test/README.md) is provided that uses the plugin, and which also uses a custom logo.\
-Behavior is largely the same as the built in HTML Form authenticator, and covers the entire user journey.
+An [example deployment](test/README.md) is provided that uses the plugin, with an example custom look and feel.\
+Behavior is largely the same as the built-in HTML Form authenticator, and covers the entire user journey.
 
 ![Initial Screen](doc/images/authentication/initial.png)
 
@@ -45,7 +45,7 @@ Then update the `pom.xml` file of this project with matching versions.
 
 ### Build the JAR Files
 
-Ensure that JDK 11 or later is installed, and also the [maven build tool](https://maven.apache.org/install.html).\
+Ensure that JDK 17 or later is installed, and also the [maven build tool](https://maven.apache.org/install.html).\
 Then build the plugin code with this command:
 
 ```bash
