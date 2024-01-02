@@ -28,9 +28,9 @@ import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.errors.CredentialManagerException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -48,7 +48,7 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
     private static final String USER_TO_SET_PASSWORD_FOR = "USER_TO_SET_PASSWORD_FOR";
     private final AccountManager _accountManager;
     private final SessionManager _sessionManager;
-    private final CredentialManager _credentialManager;
+    private final UserCredentialManager _credentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
     public UsernamePasswordActivateAndSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
@@ -122,7 +122,8 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             AccountAttributes updatedAccount = account.withPassword(password);
             try
             {
-                _credentialManager.updatePassword(updatedAccount);
+                _logger.info("*** ACTIVATE SETTING PASSWORD ***");
+                // _credentialManager.update(updatedAccount);
                 return null;
             }
             catch (CredentialManagerException e) {

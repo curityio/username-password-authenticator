@@ -22,14 +22,15 @@ import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedK
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
-import se.curity.identityserver.sdk.attribute.AuthenticationAttributes;
+import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.CredentialVerificationResult;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -49,7 +50,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordAuthenticationRequestHandler.class);
 
     private final AccountManager _accountManager;
-    private final CredentialManager _credentialManager;
+    private final UserCredentialManager _credentialManager;
     private final UserPreferenceManager _userPreferenceManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
@@ -103,17 +104,13 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         var model = requestModel.getPostRequestModel();
 
         Optional<AuthenticationResult> result = Optional.empty();
+        var subjectAttributes = SubjectAttributes.of(model.getUserName());
 
         @Nullable
-        AuthenticationAttributes attributes = _credentialManager.verifyPassword(
-                model.getUserName(),
-                model.getPassword(),
-                CredentialManager.NO_CONTEXT);
-
-        if (attributes != null)
+        var credentialVerificationResult = _credentialManager.verify(subjectAttributes, model.getPassword());
+        if (credentialVerificationResult instanceof CredentialVerificationResult.Accepted)
         {
-            // authentication was successful, set the result so that the server can see
-            // the user account of the logged in user!
+            var attributes = ((CredentialVerificationResult.Accepted) credentialVerificationResult).getAuthenticationAttributes();
             result = Optional.of(new AuthenticationResult(attributes));
             _userPreferenceManager.saveUsername(model.getUserName());
         }

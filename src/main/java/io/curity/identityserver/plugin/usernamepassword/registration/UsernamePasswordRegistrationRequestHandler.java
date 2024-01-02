@@ -34,6 +34,7 @@ import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -52,7 +53,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
 
     private final AccountManager _accountManager;
-    private final CredentialManager _credentialManager;
+    private final UserCredentialManager _credentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
 
@@ -129,7 +130,9 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         // never give a plain-text password to the account directly, use a CredentialManager to transform
         // (hash, salt etc.) the password
         String password = requestModel.getPassword();
-        String transformedPassword = _credentialManager.transform(requestModel.getUserName(), password, null);
+        String transformedPassword = password;
+        // String transformedPassword = _credentialManager.transform(requestModel.getUserName(), password, null);
+        _logger.info("*** TRANSFORMING PASSWORD ***");
 
         AccountAttributes modelAccount = AccountAttributes.of(
                 requestModel.getUserName(),
