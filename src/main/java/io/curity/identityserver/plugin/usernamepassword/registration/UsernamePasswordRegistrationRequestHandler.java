@@ -34,7 +34,6 @@ import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
-import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -53,14 +52,14 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
 
     private final AccountManager _accountManager;
-    private final UserCredentialManager _credentialManager;
+    private final CredentialManager _legacyCredentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
 
-    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config)
+    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config, CredentialManager legacyCredentialManager)
     {
         _accountManager = config.getAccountManager();
-        _credentialManager = config.getCredentialManager();
+        _legacyCredentialManager = legacyCredentialManager;
         _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
         _userPreferenceManager = config.getUserPreferenceManager();
     }
@@ -127,12 +126,11 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
     private Optional<RegistrationResult> createAccount(RegistrationRequestModel requestModel, Response response)
     {
-        // never give a plain-text password to the account directly, use a CredentialManager to transform
-        // (hash, salt etc.) the password
+        // When storing passwords in the account table, ask the CredentialManager to hash or salt the password
         String password = requestModel.getPassword();
-        String transformedPassword = password;
-        // String transformedPassword = _credentialManager.transform(requestModel.getUserName(), password, null);
-        _logger.info("*** TRANSFORMING PASSWORD ***");
+        _logger.info("*** TRANSFORMING PASSWORD, OLD: " + password);
+        String transformedPassword = _legacyCredentialManager.transform(requestModel.getUserName(), password, null);
+        _logger.info("*** TRANSFORMING PASSWORD, NEW: " + transformedPassword);
 
         AccountAttributes modelAccount = AccountAttributes.of(
                 requestModel.getUserName(),

@@ -24,11 +24,6 @@ fi
 cp ./hooks/pre-commit ./.git/hooks
 
 #
-# Clear any previous data
-#
-rm -rf data
-
-#
 # Start ngrok if required, and use 'kill -9 $(pgrep ngrok)' to
 #
 export RUNTIME_BASE_URL='https://localhost:8443'
@@ -47,10 +42,15 @@ if [ "$USE_NGROK" != 'false' ]; then
 fi
 
 #
-# Deploy the system
+# Clear any previous data
 #
 cd test
 docker compose --project-name usernamepassword down
+rm -rf data 2>/dev/null
+
+#
+# Deploy the system
+#
 docker compose --project-name usernamepassword up --force-recreate --detach
 if [ $? -ne 0 ]; then
   echo 'Problem encountered deploying the Curity Identity Server and plugin'

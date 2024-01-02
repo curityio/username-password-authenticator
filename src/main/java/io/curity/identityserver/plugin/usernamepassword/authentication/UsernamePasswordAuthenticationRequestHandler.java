@@ -66,7 +66,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     public UsernamePasswordAuthenticationRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
-        _credentialManager = configuration.getCredentialManager();
+        _credentialManager = configuration.getUserCredentialManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
     }

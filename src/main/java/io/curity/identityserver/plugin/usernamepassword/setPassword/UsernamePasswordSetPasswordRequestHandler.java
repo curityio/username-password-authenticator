@@ -23,15 +23,16 @@ import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
 import se.curity.identityserver.sdk.attribute.Attribute;
+import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.data.tokens.TokenAttributes;
 import se.curity.identityserver.sdk.errors.CredentialManagerException;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
+import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
-import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -48,7 +49,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     private final NonceTokenIssuer _nonceTokenIssuer;
     private final SessionManager _sessionManager;
     private final AccountManager _accountManager;
-    private final UserCredentialManager _credentialManager;
+    private final CredentialManager _credentialManager;
 
     public UsernamePasswordSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
@@ -187,7 +188,8 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         try
         {
             _logger.info("*** SETTING PASSWORD ***");
-            // _credentialManager.update(account);
+            _credentialManager.updatePassword(account);
+            _logger.info("*** SETTING PASSWORD DONE ***");
         }
         catch (CredentialManagerException e)
         {

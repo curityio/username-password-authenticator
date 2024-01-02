@@ -84,6 +84,9 @@
                 <email-sender>
                   <id>smtp</id>
                 </email-sender>
+                <user-credential-manager>
+                  <id>default-credential-manager</id>
+                </user-credential-manager>
               </username-password-authenticator>
             </authenticator>
           </authenticators>
