@@ -19,7 +19,6 @@ package io.curity.identityserver.plugin.usernamepassword.config;
 import se.curity.identityserver.sdk.config.Configuration;
 import se.curity.identityserver.sdk.config.annotation.Description;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.EmailSender;
 import se.curity.identityserver.sdk.service.ExceptionFactory;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
@@ -37,10 +36,7 @@ import java.util.Optional;
 public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
 {
     @Description("The Credential Manager is used to verify and update credentials")
-    CredentialManager getCredentialManager();
-
-    @Description("The User Credential Manager is used to verify and update credentials")
-    UserCredentialManager getUserCredentialManager();
+    UserCredentialManager getCredentialManager();
 
     @Description("An object to manage storing and restoring the current user")
     UserPreferenceManager getUserPreferenceManager();
