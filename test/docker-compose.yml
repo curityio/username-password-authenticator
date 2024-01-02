@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   curity-idsvr:
-    image: custom_curity_idsvr:7.4.0
+    image: custom_curity_idsvr:latest
     ports:
      - 6749:6749
      - 8443:8443

@@ -13,6 +13,12 @@ Also ensure that these tools are installed on your local computer:
 
 ## Deploy the Plugin
 
+First do a docker pull to ensure that your latest tag for the Curity Identity Server is updated:
+
+```bash
+docker pull curity.azurecr.io/curity/idsvr
+```
+
 Whenever you change the plugin code, build it into deployable JAR files.\
 The build script does so by producing a custom Docker image for the Curity Identity Server:
 
@@ -27,7 +33,7 @@ The deployment script uses ngrok to expose port 8443 of the local identity serve
 ./test/deploy.sh
 ```
 
-The script outputs an external base URL that is called from OAuth tools:
+The script outputs an external base URL that can be pasted into OAuth tools:
 
 ```text
 https://4bdb-2-26-158-168.eu.ngrok.io/oauth/v2/oauth-anonymous/.well-known/openid-configuration
