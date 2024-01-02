@@ -35,6 +35,7 @@
       <services>
         <zones>
           <default-zone>
+            <email-provider>smtp</email-provider>
             <symmetric-key>data:text/plain;aes,v:S.M3IwaERwbEhEemZLcVZaRQ==.Ro9kGWd2VSAMBy_q0uELdA==.YySH5c2Zaq6DilJ5a2j0Twljt9DvJnVjoYNKiqZblRQoPh4PacYzgddD4i4kOelKVZxP7l-Djli748gIOAoAHm6K1KTzEckn3ZsIehAePWY=.zdWpKHf-Mj_T_haWQap9h7gY9fR8EeOSmSmyVcZYT9E=</symmetric-key>
           </default-zone>
         </zones>
@@ -419,10 +420,10 @@
       <data-source>
         <id>default-datasource</id>
         <jdbc xmlns="https://curity.se/ns/ext-conf/jdbc">
-          <connection-string>data:text/plain;aes,v:S.eGduSldZanl1Q1BhTXRLMw==.PRQJnlHeEk4QLwPnGJYarQ==.eI2nnaH158bw-W6vyu3zKmjXoqenBzYekUh9Z7DTOdEPZyjen8za7YTl4hIQd0haCtEvypE6IzgB355pLD-LLTP3Z63r825LUfM1AsD0FlC2wb9w6THdR44ovVVbcd51.yHgcflP3P3vgBvDPZli01vvKV_8pBJTyCIFVMF-bCgc=</connection-string>
-          <driver>org.hsqldb.jdbc.JDBCDriver</driver>
-          <password>data:text/plain;aes,v:S.ZXVoNHRYeW9NakpxaVAxbg==.eeah8VPNpoornVZiPI2bKQ==.zqaYNAGH7t78C6LK5z1XPg==.adtL_UnFMq4Bk9t582z8x46VeK4lEj2LWc4j0I2buUk=</password>
-          <username>SA</username>
+          <connection-string>data:text/plain;aes,v:S.ZDVNMGVTTU10akdsamxaNQ==.dRGnOr_8ElpyZI27hojqsg==.pj0blc1Ofie8yN-O-34Pnx_ce5eKZCRNokjM8CSTbv7z8NurHK2874xwh2DV80be.xuGwWDzTpjm2_8y2DAsh2T-7VAPXDVxwucQthZBZ6nM=</connection-string>
+          <driver>org.postgresql.Driver</driver>
+          <password>data:text/plain;aes,v:S.cTRTYkdJeGxNUkVmN3Z6dw==.dE-ekaldpzZKAG4cSm9A9A==.lj41YlIq7sTQmVV9GCkyVA==.MFwaz-tXvdlgfGgKFqcYu7XOqkfZBzQf0OU0qRbv3iY=</password>
+          <username>postgres</username>
         </jdbc>
       </data-source>
     </data-sources>
@@ -430,9 +431,10 @@
       <email-provider>
         <id>smtp</id>
         <smtp>
-          <smtp-host>smtp.provider.com</smtp-host>
-          <default-sender>noreply</default-sender>
-          <username>noreply@securebank.com</username>
+          <smtp-host>smtpserver</smtp-host>
+          <smtp-port>1025</smtp-port>
+          <default-sender>noreply@example.com</default-sender>
+          <username>noreply@example.com</username>
           <password>Password1</password>
         </smtp>
       </email-provider>
@@ -468,7 +470,9 @@
       <account-manager>
         <id>default-account-manager</id>
         <enable-registration>
-          <account-verification-method>no-verification</account-verification-method>
+          <account-verification-method>email-verification</account-verification-method>
+          <set-password-after-activation>true</set-password-after-activation>
+          <email-provider>smtp</email-provider>
         </enable-registration>
         <username-is-email>true</username-is-email>
         <account-data-source>default-datasource</account-data-source>

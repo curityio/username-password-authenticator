@@ -24,6 +24,11 @@ fi
 cp ./hooks/pre-commit ./.git/hooks
 
 #
+# Clear any previous data
+#
+rm -rf data
+
+#
 # Start ngrok if required, and use 'kill -9 $(pgrep ngrok)' to
 #
 export RUNTIME_BASE_URL='https://localhost:8443'
