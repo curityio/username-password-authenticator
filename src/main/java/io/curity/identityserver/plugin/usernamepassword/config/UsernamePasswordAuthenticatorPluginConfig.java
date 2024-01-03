@@ -38,24 +38,19 @@ public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
     @Description("The Credential Manager is used to verify and update credentials")
     UserCredentialManager getCredentialManager();
 
-    @Description("An object to manage storing and restoring the current user")
-    UserPreferenceManager getUserPreferenceManager();
-
     @Description("The Account Manager is used to fetch the account")
     AccountManager getAccountManager();
 
     @Description("Email provider to use for 'forgot password' and 'forgot username' procedures")
     Optional<EmailSender> getEmailSender();
 
-    @Description("A nonce token issuer used in the 'forgot password' and 'set password' procedures")
+    UserPreferenceManager getUserPreferenceManager();
+
     NonceTokenIssuer getNonceTokenIssuer();
 
-    @Description("An object to manage getting information about authentication paths")
     AuthenticatorInformationProvider getAuthenticatorInformationProvider();
 
-    @Description("An object to manage storing session information")
     SessionManager getSessionManager();
 
-    @Description("An object to manage creating exceptions when invalid conditions are encountered")
     ExceptionFactory getExceptionFactory();
 }
