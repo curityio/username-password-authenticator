@@ -54,13 +54,13 @@ For details on how activation continues, see the following pages:
 
 ## Code Behavior
 
-The [Request Handler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/registration/UsernamePasswordRegistrationRequestHandler.java) provides the plugin logic for this flow.\
+The [RequestHandler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/registration/UsernamePasswordRegistrationRequestHandler.java) provides the plugin logic for this flow.\
 This class is injected with the following SDK objects, which implement its main behavior:
 
 | SDK Object | Usage |
 | ---------- | ----- |
-| [Credential Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/CredentialManager.html) | Used to transform the password entered to a secure format |
-| [Account Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine which fields to show, and to persist the account details entered |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to transform the password entered to a secure format |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine which fields to show, and to persist the account details entered |
 | [UserPreferenceManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to write a username cookie after registration, so that it is automatically populated during authentication |
 | [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL to send in activation email links |
 

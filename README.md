@@ -12,6 +12,13 @@ The [Branding and User Experience Resources](https://curity.io/resources/brandin
 In more advanced scenarios you may also want to take closer control over runtime behavior.\
 For these cases, you can use this repo as a starting point and adapt it as required.
 
+## Prerequisites
+
+Before using this plugin you must be running version 9.0 or later of the Curity Identity Server.\
+Also ensure that you are using [credential_mode=standard](https://curity.io/docs/idsvr/latest/system-admin-guide/data-sources/jdbc.html#credential-modes).\
+This requires username and password storage to be separated into `accounts` and `credentials` tables.\
+If you are using older credential storage, use v1.0 of this repo instead.
+
 ## Example Deployment
 
 An [example deployment](test/README.md) is provided that uses the plugin, with an example custom look and feel.\

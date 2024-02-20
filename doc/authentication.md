@@ -49,14 +49,14 @@ If accepted, then password autofill will work on subsequent logins.
 
 ## Code Behavior
 
-The [Request Handler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/authentication/UsernamePasswordAuthenticationRequestHandler.java) provides the plugin logic for this flow.\
+The [RequestHandler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/authentication/UsernamePasswordAuthenticationRequestHandler.java) provides the plugin logic for this flow.\
 This class is injected with the following SDK objects, which implement its main behavior:
 
 | SDK Object | Usage |
 | ---------- | ----- |
-| [Account Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine whether to display a Create Account link |
-| [UserPreferenceManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to load the username before authentication, and save it afterwards |
-| [Credential Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/CredentialManager.html) | Used to validate the username and password entered |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine whether to display a Create Account link |
+| [UserPreference Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to load the username before authentication, and save it afterwards |
+| [UserCredential Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to validate the username and password entered |
 
 The following resources can be customized as required:
 
