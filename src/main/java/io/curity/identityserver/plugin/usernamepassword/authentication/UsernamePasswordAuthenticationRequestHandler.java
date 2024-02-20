@@ -28,7 +28,6 @@ import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
-import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.service.credential.CredentialVerificationResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
@@ -52,7 +51,6 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     private final AccountManager _accountManager;
     private final UserCredentialManager _credentialManager;
     private final UserPreferenceManager _userPreferenceManager;
-    private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
     /**
      * Create a new instance of UsernamePasswordAuthenticatorRequestHandler using the configuration for this plugin.
@@ -68,7 +66,6 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         _accountManager = configuration.getAccountManager();
         _credentialManager = configuration.getCredentialManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
-        _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
     }
 
     @Override

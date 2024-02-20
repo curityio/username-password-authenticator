@@ -187,9 +187,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         account = account.withPassword(password);
         try
         {
-            _logger.info("*** SETTING PASSWORD FOR: " + account.getUserName());
             _credentialManager.update(SubjectAttributes.of(account.getUserName()), password);
-            _logger.info("*** SETTING PASSWORD DONE ***");
         }
         catch (CredentialManagerException e)
         {

@@ -123,9 +123,7 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             AccountAttributes updatedAccount = account.withPassword(password);
             try
             {
-                _logger.info("*** ACTIVATE SETTING PASSWORD FOR: " + account.getUserName());
                 _credentialManager.update(SubjectAttributes.of(account.getUserName()), password);
-                _logger.info("*** ACTIVATE SET PASSWORD DONE ***");
                 return null;
             }
             catch (CredentialManagerException e) {
