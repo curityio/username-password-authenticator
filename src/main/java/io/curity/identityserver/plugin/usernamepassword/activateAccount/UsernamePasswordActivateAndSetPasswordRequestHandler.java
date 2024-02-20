@@ -132,7 +132,11 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
                 var filteredDetails = rejectedResult.getDetails().stream()
                         .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
                 response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
+                return null;
             }
+
+            _sessionManager.remove(USER_TO_SET_PASSWORD_FOR);
+            return null;
         }
 
         setNoSessionResponse(model, response);
@@ -151,8 +155,6 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             {
                 user = _accountManager.getByUserName(value.toString());
             }
-
-            _sessionManager.remove(USER_TO_SET_PASSWORD_FOR);
         }
 
         return user;
