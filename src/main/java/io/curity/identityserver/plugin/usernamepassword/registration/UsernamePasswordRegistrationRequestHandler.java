@@ -53,16 +53,15 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
 public final class UsernamePasswordRegistrationRequestHandler implements RegistrationRequestHandler<RequestModel>
 {
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
-
     private final AccountManager _accountManager;
     private final UserCredentialManager _userCredentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
 
-    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config, UserCredentialManager userCredentialManager)
+    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config)
     {
         _accountManager = config.getAccountManager();
-        _userCredentialManager = userCredentialManager;
+        _userCredentialManager = config.getCredentialManager();
         _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
         _userPreferenceManager = config.getUserPreferenceManager();
     }
@@ -88,6 +87,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
                     Response.ResponseModelScope.NOT_FAILURE);
         }
 
+        response.putViewData("_hasCredentialPolicy", true, Response.ResponseModelScope.ANY);
         return new RequestModel(request, _accountManager.useUsernameAsEmail(), _accountManager.isSetPasswordAfterActivation());
     }
 
@@ -154,11 +154,11 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
             // Use the easiest to manage technique from the 9.0 documentation to save the user and password
             // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#credential-data-access-provider-plugins
             var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
-            if (accountResult instanceof AccountCreationResult.CredentialRejected) {
+            if (accountResult instanceof AccountCreationResult.CredentialRejected rejected) {
 
                 response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
 
-                var filteredDetails = ((AccountCreationResult.CredentialRejected) accountResult).getCredentialResult().getDetails().stream()
+                var filteredDetails = rejected.getCredentialResult().getDetails().stream()
                         .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
                 response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
 

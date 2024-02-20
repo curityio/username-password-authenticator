@@ -124,12 +124,12 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
         if (account != null)
         {
             CredentialUpdateResult result = _userCredentialManager.update(SubjectAttributes.of(account.getUserName()), password);
-            if (result instanceof CredentialUpdateResult.Rejected rejectedResult)
+            if (result instanceof CredentialUpdateResult.Rejected rejected)
             {
                 response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
                 response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
 
-                var filteredDetails = rejectedResult.getDetails().stream()
+                var filteredDetails = rejected.getDetails().stream()
                         .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
                 response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
                 return null;

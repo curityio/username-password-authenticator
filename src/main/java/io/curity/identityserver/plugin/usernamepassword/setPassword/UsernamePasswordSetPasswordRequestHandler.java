@@ -113,12 +113,12 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
             return null;
         }
 
-        if (result instanceof UpdatePasswordResult.UpdateRejected rejectedResult)
+        if (result instanceof UpdatePasswordResult.UpdateRejected rejected)
         {
             response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
             response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
 
-            var filteredDetails = rejectedResult.getRejected().getDetails().stream()
+            var filteredDetails = rejected.getRejected().getDetails().stream()
                     .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
             response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
         }

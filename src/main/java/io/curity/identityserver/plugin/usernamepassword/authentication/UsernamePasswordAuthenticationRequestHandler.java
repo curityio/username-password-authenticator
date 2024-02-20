@@ -30,6 +30,7 @@ import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.credential.CredentialVerificationResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
+import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -105,15 +106,19 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
 
         @Nullable
         var credentialVerificationResult = _userCredentialManager.verify(subjectAttributes, model.getPassword());
-        if (credentialVerificationResult instanceof CredentialVerificationResult.Accepted)
+        if (credentialVerificationResult instanceof CredentialVerificationResult.Accepted accepted)
         {
-            var attributes = ((CredentialVerificationResult.Accepted) credentialVerificationResult).getAuthenticationAttributes();
+            var attributes = accepted.getAuthenticationAttributes();
             result = Optional.of(new AuthenticationResult(attributes));
             _userPreferenceManager.saveUsername(model.getUserName());
         }
-        else
+        else if (credentialVerificationResult instanceof CredentialVerificationResult.Rejected rejected)
         {
             response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.credentials"));
+            var filteredDetails = rejected.getDetails().stream()
+                    .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
+
+            response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
             response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
                     Response.ResponseModelScope.FAILURE);
         }

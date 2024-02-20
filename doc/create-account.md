@@ -16,19 +16,28 @@ The behavior of Create Account is influenced by the plugin's Account Manager set
 | Username is Email | When this is set, the user must enter an email in the usernmame field and the email field is not shown |
 | Email Provider | The email provider configured against the account manager is used for activation emails |
 
-## Initial Screen
+## The Credential Policy
+
+If `Set Password after Activation` is not configured then a password is entered during account creation.\
+A Credential Policy is optional but if configured these rules will be enforced:
+
+![Credential Policy](images/shared/credential-policy.png)
+
+## Create Account Screen
 
 The entry point to the create account flow is shown below.\
 The page is invoked via a GET request to a URL with this format: `/authn/registration/usernamepassword`.
 
 ![Initial Screen](images/create-account/initial.png)
 
-## Input Validation
-
 In the event of invalid input being provided, a suitable error message is displayed.\
 The user's form input is maintained, with the exception of the password and terms:
 
 ![Invalid Input](images/create-account/invalid-input.png)
+
+If a password is entered that fails the password policy a screen of the following form is shown and the user can retry:
+
+![Password Policy Failed](images/create-account/password-policy-failed.png)
 
 ## Successful Account Creation
 
@@ -59,10 +68,10 @@ This class is injected with the following SDK objects, which implement its main 
 
 | SDK Object | Usage |
 | ---------- | ----- |
-| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to transform the password entered to a secure format |
 | [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine which fields to show, and to persist the account details entered |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to transform the password entered to a secure format |
+| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL when sending an email link |
 | [UserPreferenceManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to write a username cookie after registration, so that it is automatically populated during authentication |
-| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL to send in activation email links |
 
 The following resources can be customized as required:
 

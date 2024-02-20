@@ -22,11 +22,21 @@ This nonce and the account ID are stored in a data source, with a time to live c
 https://idsvr.example.com/authn/anonymous/usernamepassword/activate-and-set?token=CRLUnySdgDvLmbV2zdeXgUvZ60rUTut6
 ```
 
-## Successful Activation
+## The Credential Policy
+
+A Credential Policy is optional but if configured these rules will be enforced:
+
+![Credential Policy](images/shared/credential-policy.png)
+
+## Activation Screen
 
 If the email link is valid, then the account is activated and the user is prompted to set a password:
 
 ![Account Verify Password](images/activate-set-password/account-verify-password.png)
+
+If the new password fails the password policy a screen of the following form is shown and the user can retry:
+
+![Password Policy Failed](images/activate-set-password/password-policy-failed.png)
 
 At this point the account is activated and the user may login to your application:
 
@@ -65,7 +75,9 @@ This class is injected with the following SDK objects, which implement its main 
 | SDK Object | Usage |
 | ---------- | ----- |
 | [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
-| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL to send in the email link |
+| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL for the received email link |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to update the password in the configured data source |
+| [SessionManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/SessionManager.html) | Used to cache the nonce data after introspection, to support retries |
 
 The following resources can be customized as required:
 

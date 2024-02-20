@@ -50,6 +50,7 @@
     #if ($_errors)
         #set($_errorClass = "is-error is-error-danger")
     #end
+    #parse("fragments/credential-operation-details")
     <label for="userName" class="$!_errorClass">#message("authenticator.username-password-authenticator.authenticate.view.username")</label>
     <input type="text" id="userName" name="userName" class="block full-width mb1 field-light $!_errorClass" autocapitalize="none"
            value="$!userNameValue">
