@@ -488,8 +488,27 @@
         <data-source-backed>
           <data-source-id>default-datasource</data-source-id>
         </data-source-backed>
+        <credential-policy>
+          <policy>custom-credential-policy</policy>
+        </credential-policy>
       </credential-manager>
     </credential-managers>
+    <credential-policies>
+      <credential-policy>
+        <id>custom-credential-policy</id>
+        <complexity>
+          <min-length>8</min-length>
+          <min-lower-case-characters>1</min-lower-case-characters>
+          <min-upper-case-characters>1</min-upper-case-characters>
+          <min-digits>1</min-digits>
+          <max-sequence>1</max-sequence>
+        </complexity>
+        <temporary-lockout>
+          <failed-attempts>3</failed-attempts>
+          <duration>60</duration>
+        </temporary-lockout>
+      </credential-policy>
+    </credential-policies>
   </processing>
   <nacm xmlns="urn:ietf:params:xml:ns:yang:ietf-netconf-acm">
     <write-default>permit</write-default>
