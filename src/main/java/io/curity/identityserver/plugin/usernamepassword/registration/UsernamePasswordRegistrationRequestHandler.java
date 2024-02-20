@@ -30,10 +30,13 @@ import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationResult;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
+import se.curity.identityserver.sdk.service.AccountCreationResult;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
+import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -52,14 +55,14 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
 
     private final AccountManager _accountManager;
-    private final UserCredentialManager _credentialManager;
+    private final UserCredentialManager _userCredentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
 
-    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config, UserCredentialManager credentialManager)
+    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config, UserCredentialManager userCredentialManager)
     {
         _accountManager = config.getAccountManager();
-        _credentialManager = credentialManager;
+        _userCredentialManager = userCredentialManager;
         _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
         _userPreferenceManager = config.getUserPreferenceManager();
     }
@@ -126,10 +129,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
     private Optional<RegistrationResult> createAccount(RegistrationRequestModel requestModel, Response response)
     {
-        // Use the easiest to manage technique from the 9.0 documentation to save the user and password
-        // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#credential-data-access-provider-plugins
         String password = requestModel.getPassword();
-        AccountManager accountManager = _accountManager.withCredentialManager(_credentialManager);
         AccountAttributes modelAccount = AccountAttributes.of(requestModel.getUserName(), password, requestModel.getPrimaryEmail())
                 .withActive(false);
 
@@ -151,7 +151,20 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
-            accountManager.createAccount(account);
+            // Use the easiest to manage technique from the 9.0 documentation to save the user and password
+            // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#credential-data-access-provider-plugins
+            var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
+            if (accountResult instanceof AccountCreationResult.CredentialRejected) {
+
+                response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
+
+                var filteredDetails = ((AccountCreationResult.CredentialRejected) accountResult).getCredentialResult().getDetails().stream()
+                        .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
+                response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
+
+                onPostRequestValidationError(response, requestModel);
+                return Optional.empty();
+            }
         }
         catch (ExternalServiceException e)
         {
@@ -159,7 +172,8 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
             // Add a generic error to the response's errors array to avoid a backend error
             // being shown to users in the form.
-            response.addErrorMessage(ErrorMessage.withMessage("An error has occurred while creating a new account. " +
+            response.addErrorMessage(ErrorMessage.withMessage(
+                    "An error has occurred while creating a new account. " +
                     "Please try again and contact us if you still have problems."));
 
             // by adding an error to the response above, we ensure an error response will be returned
@@ -213,5 +227,4 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
                 .map(String::trim)
                 .orElse("");
     }
-
 }

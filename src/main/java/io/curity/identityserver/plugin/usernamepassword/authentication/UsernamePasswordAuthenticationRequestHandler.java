@@ -49,7 +49,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordAuthenticationRequestHandler.class);
 
     private final AccountManager _accountManager;
-    private final UserCredentialManager _credentialManager;
+    private final UserCredentialManager _userCredentialManager;
     private final UserPreferenceManager _userPreferenceManager;
 
     /**
@@ -64,7 +64,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
     public UsernamePasswordAuthenticationRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
-        _credentialManager = configuration.getCredentialManager();
+        _userCredentialManager = configuration.getCredentialManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
     }
 
@@ -104,7 +104,7 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         var subjectAttributes = SubjectAttributes.of(model.getUserName());
 
         @Nullable
-        var credentialVerificationResult = _credentialManager.verify(subjectAttributes, model.getPassword());
+        var credentialVerificationResult = _userCredentialManager.verify(subjectAttributes, model.getPassword());
         if (credentialVerificationResult instanceof CredentialVerificationResult.Accepted)
         {
             var attributes = ((CredentialVerificationResult.Accepted) credentialVerificationResult).getAuthenticationAttributes();

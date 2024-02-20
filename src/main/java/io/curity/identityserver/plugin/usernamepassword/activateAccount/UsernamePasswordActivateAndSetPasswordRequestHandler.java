@@ -17,6 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.activateAccount;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
+import io.curity.identityserver.plugin.usernamepassword.setPassword.UpdatePasswordResult;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,9 @@ import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
+import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -49,14 +52,14 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
     private static final String USER_TO_SET_PASSWORD_FOR = "USER_TO_SET_PASSWORD_FOR";
     private final AccountManager _accountManager;
     private final SessionManager _sessionManager;
-    private final UserCredentialManager _credentialManager;
+    private final UserCredentialManager _userCredentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
     public UsernamePasswordActivateAndSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
         _sessionManager = configuration.getSessionManager();
-        _credentialManager = configuration.getCredentialManager();
+        _userCredentialManager = configuration.getCredentialManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
     }
 
@@ -120,16 +123,15 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
         AccountAttributes account = getUserAccountFromSession();
         if (account != null)
         {
-            AccountAttributes updatedAccount = account.withPassword(password);
-            try
+            CredentialUpdateResult result = _userCredentialManager.update(SubjectAttributes.of(account.getUserName()), password);
+            if (result instanceof CredentialUpdateResult.Rejected rejectedResult)
             {
-                _credentialManager.update(SubjectAttributes.of(account.getUserName()), password);
-                return null;
-            }
-            catch (CredentialManagerException e) {
-
                 response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
-                return null;
+                response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
+
+                var filteredDetails = rejectedResult.getDetails().stream()
+                        .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
+                response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
             }
         }
 
