@@ -55,8 +55,8 @@ This class is injected with the following SDK objects, which implement its main 
 | SDK Object | Usage |
 | ---------- | ----- |
 | [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine whether to display a Create Account link |
-| [UserPreference Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to load the username before authentication, and save it afterwards |
-| [UserCredential Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to validate the username and password entered |
+| [UserPreferenceManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to load the username before authentication, and save it afterwards |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to validate the username and password entered |
 
 The following resources can be customized as required:
 

@@ -31,9 +31,9 @@ import se.curity.identityserver.sdk.authentication.RegistrationResult;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -52,14 +52,14 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
 
     private final AccountManager _accountManager;
-    private final CredentialManager _legacyCredentialManager;
+    private final UserCredentialManager _credentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
 
-    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config, CredentialManager legacyCredentialManager)
+    public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config, UserCredentialManager credentialManager)
     {
         _accountManager = config.getAccountManager();
-        _legacyCredentialManager = legacyCredentialManager;
+        _credentialManager = credentialManager;
         _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
         _userPreferenceManager = config.getUserPreferenceManager();
     }
@@ -126,16 +126,11 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
     private Optional<RegistrationResult> createAccount(RegistrationRequestModel requestModel, Response response)
     {
-        // When storing passwords in the account table, ask the CredentialManager to hash or salt the password
+        // Use the easiest to manage technique from the 9.0 documentation to save the user and password
+        // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#credential-data-access-provider-plugins
         String password = requestModel.getPassword();
-        _logger.info("*** TRANSFORMING PASSWORD, OLD: " + password);
-        String transformedPassword = _legacyCredentialManager.transform(requestModel.getUserName(), password, null);
-        _logger.info("*** TRANSFORMING PASSWORD, NEW: " + transformedPassword);
-
-        AccountAttributes modelAccount = AccountAttributes.of(
-                requestModel.getUserName(),
-                transformedPassword,
-                requestModel.getPrimaryEmail())
+        AccountManager accountManager = _accountManager.withCredentialManager(_credentialManager);
+        AccountAttributes modelAccount = AccountAttributes.of(requestModel.getUserName(), password, requestModel.getPrimaryEmail())
                 .withActive(false);
 
         String firstName = trimmed(requestModel.getFirstName());
@@ -156,7 +151,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
-            _accountManager.createAccount(account);
+            accountManager.createAccount(account);
         }
         catch (ExternalServiceException e)
         {

@@ -52,7 +52,8 @@ Then update the `pom.xml` file of this project with matching versions.
 
 ### Build the JAR Files
 
-Ensure that JDK 17 or later is installed, and also the [maven build tool](https://maven.apache.org/install.html).\
+Ensure that JDK 21 or later is installed, and also the [maven build tool](https://maven.apache.org/install.html).\
+The plugin uses Java 17 but Java 21 is needed to use version 9.0 or latest of the Curity Identity Server SDK.\
 Then build the plugin code with this command:
 
 ```bash
