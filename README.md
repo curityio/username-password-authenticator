@@ -15,8 +15,7 @@ For these cases, you can use this repo as a starting point and adapt it as requi
 ## Prerequisites
 
 Before using this plugin you must be running version 9.0 or later of the Curity Identity Server.\
-Also ensure that you are using [credential_mode=standard](https://curity.io/docs/idsvr/latest/system-admin-guide/data-sources/jdbc.html#credential-modes).\
-This requires username and password storage to be separated into `accounts` and `credentials` tables.\
+Also ensure that you are using [credential_mode=standard](https://curity.io/docs/idsvr/latest/system-admin-guide/data-sources/jdbc.html#credential-modes) for your credential manager.\
 If you are using older credential storage, use v3.0 of this repo instead.
 
 ## Example Deployment
