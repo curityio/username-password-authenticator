@@ -17,7 +17,6 @@
 package io.curity.identityserver.plugin.usernamepassword.activateAccount;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
-import io.curity.identityserver.plugin.usernamepassword.setPassword.UpdatePasswordResult;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ import se.curity.identityserver.sdk.attribute.Attribute;
 import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.ActivationResult;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
-import se.curity.identityserver.sdk.errors.CredentialManagerException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.SessionManager;
@@ -66,7 +64,6 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
     @Override
     public ActivateAndSetPasswordRequestModel preProcess(Request request, Response response)
     {
-
         if (request.isGetRequest())
         {
             response.setResponseModel(templateResponseModel(emptyMap(),

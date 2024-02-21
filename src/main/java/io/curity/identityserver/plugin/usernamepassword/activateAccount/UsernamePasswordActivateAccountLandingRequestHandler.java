@@ -27,10 +27,9 @@ import se.curity.identityserver.sdk.service.ExceptionFactory;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
+import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 import java.util.HashMap;
-
-import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 public class UsernamePasswordActivateAccountLandingRequestHandler implements AnonymousRequestHandler<ActivateAccountRequestModel>
 {

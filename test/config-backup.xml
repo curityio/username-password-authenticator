@@ -473,7 +473,7 @@
         <id>default-account-manager</id>
         <enable-registration>
           <account-verification-method>email-verification</account-verification-method>
-          <set-password-after-activation>true</set-password-after-activation>
+          <set-password-after-activation>false</set-password-after-activation>
           <email-provider>smtp</email-provider>
         </enable-registration>
         <username-is-email>true</username-is-email>

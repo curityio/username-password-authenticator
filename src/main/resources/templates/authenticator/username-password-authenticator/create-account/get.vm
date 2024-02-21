@@ -85,9 +85,11 @@
             <label for="password">#message("authenticator.username-password-authenticator.create-account.view.password")</label>
             <input class="block full-width mb1 field-light" type="password" name="password">
             <i class="form-password-reveal-form-icon"></i>
-            <div class="progress progress-thin">
-                <div class="progress-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
-            </div>
+            #if (false)
+                <div class="progress progress-thin">
+                    <div class="progress-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                </div>
+            #end
         </div>
 
         #*
