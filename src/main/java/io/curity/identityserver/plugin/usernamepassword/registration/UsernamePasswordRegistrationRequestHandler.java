@@ -151,6 +151,16 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
+            ErrorMessage error = _accountManager.ensureNonDuplicateAccount(
+                    requestModel.getUserName(),
+                    requestModel.getPrimaryEmail(),
+                    requestModel.getPrimaryPhoneNumber()).orElse(null);
+            if (error != null)
+            {
+                response.addErrorMessage(error);
+                return Optional.empty();
+            }
+
             // Use the easiest to manage technique from the 9.0 documentation to save the user and password
             // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#credential-data-access-provider-plugins
             var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
