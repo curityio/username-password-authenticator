@@ -37,7 +37,8 @@ If the password has been previously saved by the user, the browser will autofill
 
 ## Input Validation
 
-If invalid credentials are entered, the screen is not submitted and the user must correct their input:
+If invalid credentials are entered, the screen is not submitted and the user must correct their input.\
+If a credential policy is configured the error presented to users includes policy details:
 
 ![Blank Input](images/authentication/invalid-input.png)
 
