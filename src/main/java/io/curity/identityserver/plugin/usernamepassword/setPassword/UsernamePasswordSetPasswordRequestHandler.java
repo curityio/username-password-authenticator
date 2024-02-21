@@ -17,6 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
+import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,6 @@ import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
-import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -117,10 +117,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         {
             response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
             response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
-
-            var filteredDetails = rejected.getRejected().getDetails().stream()
-                    .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
-            response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
+            CredentialOperations.onCredentialUpdateRejected(response, rejected.getRejected().getDetails());
         }
         else if (result instanceof UpdatePasswordResult.InvalidAccount)
         {

@@ -17,6 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.activateAccount;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
+import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,6 @@ import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
-import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -125,10 +125,7 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             {
                 response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
                 response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
-
-                var filteredDetails = rejected.getDetails().stream()
-                        .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
-                response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
+                CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
                 return null;
             }
 

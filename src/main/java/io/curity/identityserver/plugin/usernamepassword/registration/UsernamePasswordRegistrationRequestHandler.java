@@ -18,6 +18,7 @@ package io.curity.identityserver.plugin.usernamepassword.registration;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.registration.RequestModel.RegistrationRequestModel;
+import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
-import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -167,11 +167,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
             if (accountResult instanceof AccountCreationResult.CredentialRejected rejected) {
 
                 response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
-
-                var filteredDetails = rejected.getCredentialResult().getDetails().stream()
-                        .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
-                response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
-
+                CredentialOperations.onCredentialUpdateRejected(response, rejected.getCredentialResult().getDetails());
                 onPostRequestValidationError(response, requestModel);
                 return Optional.empty();
             }

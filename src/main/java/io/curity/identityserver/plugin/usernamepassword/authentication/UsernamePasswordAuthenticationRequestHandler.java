@@ -18,6 +18,7 @@ package io.curity.identityserver.plugin.usernamepassword.authentication;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
+import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,6 @@ import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.credential.CredentialVerificationResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
-import se.curity.identityserver.sdk.service.credential.results.SubjectCredentialsNotFound;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -115,12 +115,8 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         else if (credentialVerificationResult instanceof CredentialVerificationResult.Rejected rejected)
         {
             response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.credentials"));
-            var filteredDetails = rejected.getDetails().stream()
-                    .filter(detail -> !(detail instanceof SubjectCredentialsNotFound)).toList();
-
-            response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
-            response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
-                    Response.ResponseModelScope.FAILURE);
+            CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
+            response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(), Response.ResponseModelScope.FAILURE);
         }
 
         return result;
