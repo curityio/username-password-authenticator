@@ -107,7 +107,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         try
         {
             error = _accountManager.ensureNonDuplicateAccount(
-                    model.getUserName(), model.getPrimaryEmail()).orElse(null);
+                    model.getUserName(), model.getPrimaryEmail(), model.getPrimaryPhoneNumber()).orElse(null);
         }
         catch (RuntimeException e)
         {
