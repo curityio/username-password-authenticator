@@ -44,8 +44,8 @@
 #end
 
 #define ($_body)
-<h2>#message("authenticator.username-password-authenticator.authenticate.view.top-header")</h2>
 #parse("fragments/credential-operation-details")
+<h2>#message("authenticator.username-password-authenticator.authenticate.view.top-header")</h2>
 <form method="post" action="$_authUrl">
 
     #if ($_errors)
