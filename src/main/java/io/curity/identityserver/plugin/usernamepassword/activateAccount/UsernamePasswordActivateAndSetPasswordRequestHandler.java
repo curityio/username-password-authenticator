@@ -17,7 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.activateAccount;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
-import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +123,6 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             CredentialUpdateResult result = _userCredentialManager.update(SubjectAttributes.of(account.getUserName()), password);
             if (result instanceof CredentialUpdateResult.Rejected rejected)
             {
-                response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
                 response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
                 CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
                 return null;

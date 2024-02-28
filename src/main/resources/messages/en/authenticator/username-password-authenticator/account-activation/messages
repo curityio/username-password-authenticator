@@ -14,7 +14,6 @@ validation.error.token.required=Missing token.
 validation.error.email.invalid=Invalid email address.
 validation.error.missing-email-or-phone=Please fill in your email address.
 validation.error.password.required=You must enter a password
-validation.error.password.weak=Password not strong enough
 
 view.newToken.head1=Send a new activation email
 view.newToken.p1=Enter the email address you gave when you created your account and new activation email will be sent to you.

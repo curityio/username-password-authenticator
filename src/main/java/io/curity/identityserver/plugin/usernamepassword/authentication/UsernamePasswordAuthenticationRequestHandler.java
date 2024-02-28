@@ -18,11 +18,10 @@ package io.curity.identityserver.plugin.usernamepassword.authentication;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
-import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
@@ -104,7 +103,6 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         Optional<AuthenticationResult> result = Optional.empty();
         var subjectAttributes = SubjectAttributes.of(model.getUserName());
 
-        @Nullable
         var credentialVerificationResult = _userCredentialManager.verify(subjectAttributes, model.getPassword());
         if (credentialVerificationResult instanceof CredentialVerificationResult.Accepted accepted)
         {

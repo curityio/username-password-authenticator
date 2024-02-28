@@ -31,7 +31,7 @@ The page is invoked via a GET request to a URL with this format: `/authn/registr
 ![Initial Screen](images/create-account/initial.png)
 
 In the event of invalid input being provided, a suitable error message is displayed.\
-The user's form input is maintained, with the exception of the password and terms:
+The user's form input is maintained, except for the password and terms:
 
 ![Invalid Input](images/create-account/invalid-input.png)
 
@@ -66,11 +66,11 @@ For details on how activation continues, see the following pages:
 The [RequestHandler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/registration/UsernamePasswordRegistrationRequestHandler.java) provides the plugin logic for this flow.\
 This class is injected with the following SDK objects, which implement its main behavior:
 
-| SDK Object | Usage |
-| ---------- | ----- |
-| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine which fields to show, and to persist the account details entered |
-| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to transform the password entered to a secure format |
-| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL when sending an email link |
+| SDK Object | Usage                                                                                                           |
+| ---------- |-----------------------------------------------------------------------------------------------------------------|
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine which fields to show, and to persist the account details entered                              |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to validate and store the password entered                                   |
+| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL when sending an email link                                                       |
 | [UserPreferenceManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to write a username cookie after registration, so that it is automatically populated during authentication |
 
 The following resources can be customized as required:

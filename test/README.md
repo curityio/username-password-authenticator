@@ -96,11 +96,6 @@ select * from accounts;
 select * from credentials;
 ```
 
-The default data source stores user accounts and credentials in separate tables.\
-Settings are managed by navigating to `Facilities / Data Sources` in the Admin UI:
-
-![Data Source](images/data-source.png)
-
 ## Free Resources
 
 When finished testing, run this command to free Docker and ngrok resources:

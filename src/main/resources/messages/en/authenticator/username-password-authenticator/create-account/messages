@@ -34,5 +34,3 @@ error.validation.phone.duplicate=The phone number you provided is already regist
 error.validation.password.required=You have to enter a password
 error.validation.password.mismatch=Your passwords do not match
 error.validation.terms=You have to agree to the terms of service
-
-validation.error.password.weak=Password not strong enough

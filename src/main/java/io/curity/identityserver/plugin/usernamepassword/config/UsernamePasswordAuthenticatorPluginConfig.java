@@ -35,7 +35,7 @@ import java.util.Optional;
 @Description("A custom implementation of username password flows")
 public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
 {
-    @Description("The User Credential Manager is used to verify and update credentials")
+    @Description("The Credential Manager is used to verify and update credentials")
     UserCredentialManager getCredentialManager();
 
     @Description("The Account Manager is used to fetch the account")

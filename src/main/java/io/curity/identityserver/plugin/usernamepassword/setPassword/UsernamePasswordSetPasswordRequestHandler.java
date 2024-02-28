@@ -17,7 +17,7 @@
 package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
-import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +115,6 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
 
         if (result instanceof UpdatePasswordResult.UpdateRejected rejected)
         {
-            response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
             response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
             CredentialOperations.onCredentialUpdateRejected(response, rejected.getRejected().getDetails());
         }

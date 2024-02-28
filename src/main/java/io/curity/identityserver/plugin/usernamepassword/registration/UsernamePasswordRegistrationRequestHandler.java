@@ -18,7 +18,7 @@ package io.curity.identityserver.plugin.usernamepassword.registration;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.registration.RequestModel.RegistrationRequestModel;
-import io.curity.identityserver.plugin.usernamepassword.shared.CredentialOperations;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +162,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
             }
 
             // Use the easiest to manage technique from the 9.0 documentation to save the user and password
-            // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#credential-data-access-provider-plugins
+            // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#account-creation-using-the-accountmanager-service
             var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
             if (accountResult instanceof AccountCreationResult.CredentialRejected rejected) {
 

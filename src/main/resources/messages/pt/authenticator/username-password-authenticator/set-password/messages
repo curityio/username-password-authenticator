@@ -12,4 +12,3 @@ validation.error.token.invalid=Link inválido. Observe que os links são válido
 validation.error.token.required=Token ausente
 validation.error.password.required=Você precisa digitar uma nova senha
 validation.error.password.mismatch=Suas senhas não correspondem
-validation.error.password.weak=A senha não é forte o suficiente
