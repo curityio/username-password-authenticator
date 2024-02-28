@@ -39,7 +39,6 @@
     <p>#message("authenticator.username-password-authenticator.create-account.view.description")</p>
 </div>
 #parse("fragments/credential-operation-details")
-
         <div class="form-field">
             <label for="name.givenName">#message(
                 "authenticator.username-password-authenticator.create-account.view.firstName")</label>
@@ -108,10 +107,6 @@
     <button type="submit" class="button button-fullwidth button-primary">
         #message("authenticator.username-password-authenticator.create-account.view.button")
     </button>
-
-
 </form>
-
 #end
-
 #parse("layouts/default")

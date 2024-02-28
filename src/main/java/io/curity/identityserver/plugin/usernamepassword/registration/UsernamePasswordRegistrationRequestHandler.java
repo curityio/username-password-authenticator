@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 /**
@@ -78,7 +79,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
             response.setResponseModel(templateResponseModel(data, "create-account/get"),
                     HttpStatus.BAD_REQUEST);
 
-            response.setResponseModel(templateResponseModel(data, "create-account/post"),
+            response.setResponseModel(templateResponseModel(emptyMap(), "create-account/post"),
                     Response.ResponseModelScope.NOT_FAILURE);
         }
         else if (request.isGetRequest())
@@ -87,7 +88,6 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
                     Response.ResponseModelScope.NOT_FAILURE);
         }
 
-        response.putViewData("_hasCredentialPolicy", true, Response.ResponseModelScope.ANY);
         return new RequestModel(request, _accountManager.useUsernameAsEmail(), _accountManager.isSetPasswordAfterActivation());
     }
 
@@ -151,21 +151,11 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
-            ErrorMessage error = _accountManager.ensureNonDuplicateAccount(
-                    requestModel.getUserName(),
-                    requestModel.getPrimaryEmail(),
-                    requestModel.getPrimaryPhoneNumber()).orElse(null);
-            if (error != null)
-            {
-                response.addErrorMessage(error);
-                return Optional.empty();
-            }
-
             // Use the easiest to manage technique from the 9.0 documentation to save the user and password
             // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#account-creation-using-the-accountmanager-service
             var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
-            if (accountResult instanceof AccountCreationResult.CredentialRejected rejected) {
-
+            if (accountResult instanceof AccountCreationResult.CredentialRejected rejected)
+            {
                 response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
                 CredentialOperations.onCredentialUpdateRejected(response, rejected.getCredentialResult().getDetails());
                 onPostRequestValidationError(response, requestModel);

@@ -104,17 +104,21 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         var subjectAttributes = SubjectAttributes.of(model.getUserName());
 
         var credentialVerificationResult = _userCredentialManager.verify(subjectAttributes, model.getPassword());
-        if (credentialVerificationResult instanceof CredentialVerificationResult.Accepted accepted)
+        switch (credentialVerificationResult)
         {
-            var attributes = accepted.getAuthenticationAttributes();
-            result = Optional.of(new AuthenticationResult(attributes));
-            _userPreferenceManager.saveUsername(model.getUserName());
-        }
-        else if (credentialVerificationResult instanceof CredentialVerificationResult.Rejected rejected)
-        {
-            response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.credentials"));
-            CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
-            response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(), Response.ResponseModelScope.FAILURE);
+            case CredentialVerificationResult.Accepted accepted ->
+            {
+                var attributes = accepted.getAuthenticationAttributes();
+                result = Optional.of(new AuthenticationResult(attributes));
+                _userPreferenceManager.saveUsername(model.getUserName());
+            }
+
+            case CredentialVerificationResult.Rejected rejected ->
+            {
+                response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.credentials"));
+                CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
+                response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(), Response.ResponseModelScope.FAILURE);
+            }
         }
 
         return result;
