@@ -30,6 +30,7 @@ public final class CredentialOperations {
         var filteredDetails = details.stream().filter(detail ->
                 !(detail instanceof SubjectCredentialsNotFound || detail instanceof PasswordRejectedByDataSource)
         ).toList();
+
         response.putViewData("_rejection_details", filteredDetails, Response.ResponseModelScope.FAILURE);
     }
 }

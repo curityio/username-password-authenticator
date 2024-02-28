@@ -37,13 +37,13 @@
 
 #define($_body)
     #if (!($_nonce_is_invalid))
+        #parse("fragments/credential-operation-details")
         <form method="post">
 
             <div class="center">
                 <h1>#message("authenticator.username-password-authenticator.set-password.view.head1")</h1>
             </div>
 
-            #parse("fragments/credential-operation-details")
             <div class="form-password-reveal-form password-group">
                 <label for="password">#message("authenticator.username-password-authenticator.account-activation.view.newPassword")</label>
                 <input class="block full-width mb1 field-light" type="password" name="password" autocomplete="new-password" autofocus/>

@@ -30,13 +30,10 @@ A Credential Policy is optional but if configured these rules will be enforced:
 ## Set Password Screen
 
 If the link is valid then the set password screen is invoked via a URL with this format: `/authn/authentication/set-password`.\
-The user then enters a new password and the indicator shows the password strength:
+The user then enters a new password which may need to meet a credential policy.\
+If this fails a screen of the following form is shown and the user can retry:
 
-![Set Password Screen](images/set-password/setting-password.png)
-
-If the new password fails the password policy a screen of the following form is shown and the user can retry:
-
-![Password Policy Failed](images/set-password/password-policy-failed.png)
+![Password Policy Failed](images/shared/password-policy-failed.png)
 
 Once the password is updated, the following screen is displayed.\
 The user can then return to the login screen and sign in to the application.

@@ -30,14 +30,10 @@ The page is invoked via a GET request to a URL with this format: `/authn/registr
 
 ![Initial Screen](images/create-account/initial.png)
 
-In the event of invalid input being provided, a suitable error message is displayed.\
-The user's form input is maintained, except for the password and terms:
+If invalid input is provided, such as a password not meeting the policy, error messages are displayed.\
+The user's form input is maintained:
 
 ![Invalid Input](images/create-account/invalid-input.png)
-
-If a password is entered that fails the password policy a screen of the following form is shown and the user can retry:
-
-![Password Policy Failed](images/create-account/password-policy-failed.png)
 
 ## Successful Account Creation
 

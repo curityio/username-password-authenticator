@@ -30,15 +30,13 @@ A Credential Policy is optional but if configured these rules will be enforced:
 
 ## Activation Screen
 
-If the email link is valid, then the account is activated and the user is prompted to set a password:
+If the email link is valid, then the account is activated and the user is prompted to set a password.\
+The user then enters a new password which may need to meet a credential policy.\
+If this fails a screen of the following form is shown and the user can retry:
 
-![Account Verify Password](images/activate-set-password/account-verify-password.png)
+![Password Policy Failed](images/shared/password-policy-failed.png)
 
-If the new password fails the password policy a screen of the following form is shown and the user can retry:
-
-![Password Policy Failed](images/activate-set-password/password-policy-failed.png)
-
-At this point the account is activated and the user may login to your application:
+When the account is activated the user can then login to your applications:
 
 ![Account Verify Success](images/activate-account/account-verify-success.png)
 
