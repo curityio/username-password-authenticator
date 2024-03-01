@@ -37,20 +37,22 @@ import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 public class UsernamePasswordActivateAccountRequestHandler
-        implements AnonymousRequestHandler<ActivateAccountRequestModel> {
-
+        implements AnonymousRequestHandler<ActivateAccountRequestModel>
+{
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordActivateAccountRequestHandler.class);
 
     private final AccountManager _accountManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
-    public UsernamePasswordActivateAccountRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration) {
+    public UsernamePasswordActivateAccountRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
+    {
         _accountManager = configuration.getAccountManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
     }
 
     @Override
-    public ActivateAccountRequestModel preProcess(Request request, Response response) {
+    public ActivateAccountRequestModel preProcess(Request request, Response response)
+    {
 
         if (request.isGetRequest())
         {

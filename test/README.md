@@ -13,6 +13,12 @@ Also ensure that these tools are installed on your local computer:
 
 ## Deploy the Plugin
 
+First do a docker pull to ensure that your latest tag for the Curity Identity Server is updated:
+
+```bash
+docker pull curity.azurecr.io/curity/idsvr
+```
+
 Whenever you change the plugin code, build it into deployable JAR files.\
 The build script does so by producing a custom Docker image for the Curity Identity Server:
 
@@ -27,7 +33,7 @@ The deployment script uses ngrok to expose port 8443 of the local identity serve
 ./test/deploy.sh
 ```
 
-The script outputs an external base URL that is called from OAuth tools:
+The script outputs an external base URL that can be pasted into OAuth tools:
 
 ```text
 https://4bdb-2-26-158-168.eu.ngrok.io/oauth/v2/oauth-anonymous/.well-known/openid-configuration
@@ -53,20 +59,42 @@ From the `Facilities` menu, configure the account manager options according to y
 
 ![Account Manager](../doc/images/shared/account-manager.png)
 
-To use email features for account activation and recovery, update the email provider settings:
-
-![Email Provider](../doc/images/shared/email-provider.png)
-
 ## Test Password Flows
 
 Run a code flow from OAuth tools to perform end-to-end testing of password flows.\
 Whenever the system is deployed, select `Create Account` and register a user:
 
-![Create Account](../doc/images/create-account/initial.png)
+![Create Account](images/login.png)
+
+A mock SMTP server is provided, and you can process emails by browsing to `http://localhost:8080`:
+
+![Email Inbox](images/email-inbox.png)
 
 Activate the user if required, then test logins and account recovery behaviour:
 
 ![Authenticate](../doc/images/authentication/initial.png)
+
+## User Account and Credential Data
+
+Get a shell to the postgres Docker container:
+
+```bash
+POSTGRES_CONTAINER_ID=$(docker ps | grep postgres | awk '{print $1}')
+docker exec -it $POSTGRES_CONTAINER_ID bash
+```
+
+Then connect to the database
+
+```bash
+export PGPASSWORD=Password1 && psql -p 5432 -d idsvr -U postgres
+```
+
+Then run queries to see how users and their passwords are stored and updated:
+
+```sql
+select * from accounts;
+select * from credentials;
+```
 
 ## Free Resources
 

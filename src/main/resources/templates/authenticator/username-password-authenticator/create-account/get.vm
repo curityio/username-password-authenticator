@@ -33,13 +33,12 @@
  *#
 
 #define($_body)
+#parse("fragments/credential-operation-details")
 <form method="post" class="login-form">
 <div class="center">
     <h1 class="mt1">#message("${_templatePrefix}.view.create-account")</h1>
     <p>#message("authenticator.username-password-authenticator.create-account.view.description")</p>
 </div>
-
-
         <div class="form-field">
             <label for="name.givenName">#message(
                 "authenticator.username-password-authenticator.create-account.view.firstName")</label>
@@ -85,9 +84,9 @@
             <label for="password">#message("authenticator.username-password-authenticator.create-account.view.password")</label>
             <input class="block full-width mb1 field-light" type="password" name="password">
             <i class="form-password-reveal-form-icon"></i>
-            <div class="progress progress-thin">
+            <!--div class="progress progress-thin">
                 <div class="progress-warning" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
-            </div>
+            </div-->
         </div>
 
         #*
@@ -108,10 +107,6 @@
     <button type="submit" class="button button-fullwidth button-primary">
         #message("authenticator.username-password-authenticator.create-account.view.button")
     </button>
-
-
 </form>
-
 #end
-
 #parse("layouts/default")

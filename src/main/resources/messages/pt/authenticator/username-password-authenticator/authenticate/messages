@@ -14,3 +14,9 @@ validation.error.authentication.failed=Algo errado ocorreu durante sua autentica
 validation.error.incorrect.credentials=Credenciais incorretas
 validation.error.accountId.required=Você deve preencher seu nome de usuário
 validation.error.password.required=Você deve preencher sua senha
+
+error.too-many-attempts=Número máximo de tentativas excedido. Você pode tentar novamente mais tarde.
+subject-not-found.rejected.credential=Credenciais incorretas
+rejected.verification.credential=Verificação não foi permitida.
+locked-out.rejected.verification.credential=Número máximo de tentativas excedido. Você pode tentar novamente mais tarde.
+remaining-attempts.rejected.verification.credential=Tentativas sobrando:

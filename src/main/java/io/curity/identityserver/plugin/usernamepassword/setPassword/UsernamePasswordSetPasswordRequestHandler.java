@@ -17,21 +17,23 @@
 package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
 import se.curity.identityserver.sdk.attribute.Attribute;
+import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.data.tokens.TokenAttributes;
-import se.curity.identityserver.sdk.errors.CredentialManagerException;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
+import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -48,14 +50,14 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     private final NonceTokenIssuer _nonceTokenIssuer;
     private final SessionManager _sessionManager;
     private final AccountManager _accountManager;
-    private final CredentialManager _credentialManager;
+    private final UserCredentialManager _userCredentialManager;
 
     public UsernamePasswordSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _sessionManager = configuration.getSessionManager();
         _accountManager = configuration.getAccountManager();
-        _credentialManager = configuration.getCredentialManager();
+        _userCredentialManager = configuration.getCredentialManager();
     }
 
     @Override
@@ -111,9 +113,10 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
             return null;
         }
 
-        if (result instanceof UpdatePasswordResult.Weak)
+        if (result instanceof UpdatePasswordResult.UpdateRejected rejected)
         {
-            response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
+            response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
+            CredentialOperations.onCredentialUpdateRejected(response, rejected.getRejected().getDetails());
         }
         else if (result instanceof UpdatePasswordResult.InvalidAccount)
         {
@@ -184,13 +187,10 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         }
 
         account = account.withPassword(password);
-        try
+        CredentialUpdateResult result = _userCredentialManager.update(SubjectAttributes.of(account.getUserName()), password);
+        if (result instanceof CredentialUpdateResult.Rejected rejected)
         {
-            _credentialManager.updatePassword(account);
-        }
-        catch (CredentialManagerException e)
-        {
-            return new UpdatePasswordResult.Weak(e.getMessage());
+            return new UpdatePasswordResult.UpdateRejected(rejected);
         }
 
         sessionData.remove();

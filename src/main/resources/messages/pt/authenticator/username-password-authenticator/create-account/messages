@@ -30,6 +30,7 @@ error.validation.email.required=Você precisa inserir um endereço de e-mail
 error.validation.email.duplicate=O endereço de e-mail que você forneceu já está registrado
 error.validation.email.invalid=O e-mail não é válido
 error.validation.phone.required=Você precisa digitar seu número de telefone
+error.validation.phone.duplicate=O número de telefone que você forneceu já está registrado
 error.validation.password.required=Você precisa digitar uma senha
 error.validation.password.mismatch=Suas senhas não correspondem
 error.validation.terms=Você precisa aceitar os termos de serviço

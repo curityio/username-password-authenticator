@@ -12,4 +12,3 @@ validation.error.token.invalid=Invalid link. Note that links are only valid for 
 validation.error.token.required=Missing token
 validation.error.password.required=Your have to enter a new password
 validation.error.password.mismatch=Your passwords do not match
-validation.error.password.weak=Password not strong enough

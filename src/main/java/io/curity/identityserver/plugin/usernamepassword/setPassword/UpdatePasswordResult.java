@@ -16,6 +16,8 @@
 
 package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
+import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
+
 public class UpdatePasswordResult
 {
     private UpdatePasswordResult()
@@ -26,18 +28,18 @@ public class UpdatePasswordResult
     {
     }
 
-    public static final class Weak extends UpdatePasswordResult
+    public static final class UpdateRejected extends UpdatePasswordResult
     {
-        private final String _message;
+        private final CredentialUpdateResult.Rejected _rejected;
 
-        public Weak(String message)
+        public UpdateRejected(CredentialUpdateResult.Rejected rejected)
         {
-            _message = message;
+            _rejected = rejected;
         }
 
-        public String getMessage()
+        public CredentialUpdateResult.Rejected getRejected()
         {
-            return _message;
+            return _rejected;
         }
     }
 

@@ -17,20 +17,22 @@
 package io.curity.identityserver.plugin.usernamepassword.activateAccount;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
 import se.curity.identityserver.sdk.attribute.Attribute;
+import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.ActivationResult;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
-import se.curity.identityserver.sdk.errors.CredentialManagerException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -48,21 +50,20 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
     private static final String USER_TO_SET_PASSWORD_FOR = "USER_TO_SET_PASSWORD_FOR";
     private final AccountManager _accountManager;
     private final SessionManager _sessionManager;
-    private final CredentialManager _credentialManager;
+    private final UserCredentialManager _userCredentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
 
     public UsernamePasswordActivateAndSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
         _sessionManager = configuration.getSessionManager();
-        _credentialManager = configuration.getCredentialManager();
+        _userCredentialManager = configuration.getCredentialManager();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
     }
 
     @Override
     public ActivateAndSetPasswordRequestModel preProcess(Request request, Response response)
     {
-
         if (request.isGetRequest())
         {
             response.setResponseModel(templateResponseModel(emptyMap(),
@@ -119,17 +120,16 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
         AccountAttributes account = getUserAccountFromSession();
         if (account != null)
         {
-            AccountAttributes updatedAccount = account.withPassword(password);
-            try
+            CredentialUpdateResult result = _userCredentialManager.update(SubjectAttributes.of(account.getUserName()), password);
+            if (result instanceof CredentialUpdateResult.Rejected rejected)
             {
-                _credentialManager.updatePassword(updatedAccount);
+                response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
+                CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
                 return null;
             }
-            catch (CredentialManagerException e) {
 
-                response.addErrorMessage(ErrorMessage.withMessage("validation.error.password.weak"));
-                return null;
-            }
+            _sessionManager.remove(USER_TO_SET_PASSWORD_FOR);
+            return null;
         }
 
         setNoSessionResponse(model, response);
@@ -148,8 +148,6 @@ public class UsernamePasswordActivateAndSetPasswordRequestHandler
             {
                 user = _accountManager.getByUserName(value.toString());
             }
-
-            _sessionManager.remove(USER_TO_SET_PASSWORD_FOR);
         }
 
         return user;

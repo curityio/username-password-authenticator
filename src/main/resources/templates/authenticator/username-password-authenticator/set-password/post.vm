@@ -49,8 +49,6 @@
                 <i class="icon ion-android-arrow-back inlineicon"></i>#message("authenticator.username-password-authenticator.set-password.view.back.to.login")
             </a>
         </div>
-
     </div>
 #end
-
 #parse("layouts/default")

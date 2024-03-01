@@ -22,13 +22,21 @@ This nonce and the account ID are stored in a data source, with a time to live c
 https://idsvr.example.com/authn/anonymous/usernamepassword/activate-and-set?token=CRLUnySdgDvLmbV2zdeXgUvZ60rUTut6
 ```
 
-## Successful Activation
+## The Credential Policy
 
-If the email link is valid, then the account is activated and the user is prompted to set a password:
+A Credential Policy is optional but if configured these rules will be enforced:
 
-![Account Verify Password](images/activate-set-password/account-verify-password.png)
+![Credential Policy](images/shared/credential-policy.png)
 
-At this point the account is activated and the user may login to your application:
+## Activation Screen
+
+If the email link is valid, then the account is activated and the user is prompted to set a password.\
+The user then enters a new password which may need to meet a credential policy.\
+If this fails a screen of the following form is shown and the user can retry:
+
+![Password Policy Failed](images/shared/password-policy-failed.png)
+
+When the account is activated the user can then login to your applications:
 
 ![Account Verify Success](images/activate-account/account-verify-success.png)
 
@@ -64,8 +72,10 @@ This class is injected with the following SDK objects, which implement its main 
 
 | SDK Object | Usage |
 | ---------- | ----- |
-| [Account Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
-| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL to send in the email link |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
+| [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL for the received email link |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to update the password in the configured data source |
+| [SessionManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/SessionManager.html) | Used to cache the nonce data after introspection, to support retries |
 
 The following resources can be customized as required:
 

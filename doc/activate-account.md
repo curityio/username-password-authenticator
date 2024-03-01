@@ -56,12 +56,12 @@ Otherwise it cannot, since both the SSO session cookie and the application pre-l
 
 ## Code Behavior
 
-The [Request Handler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/activateAccount/UsernamePasswordActivateAccountRequestHandler.java) provides the plugin logic for this flow.\
+The [RequestHandler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/activateAccount/UsernamePasswordActivateAccountRequestHandler.java) provides the plugin logic for this flow.\
 This class is injected with the following SDK objects, which implement its main behavior:
 
 | SDK Object | Usage |
 | ---------- | ----- |
-| [Account Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
 | [AuthenticatorInformationProvider](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/authentication/AuthenticatorInformationProvider.html) | Used to calculate the full URL to send in the email link |
 
 The following resources can be customized as required:

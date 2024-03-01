@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class ActivateAccountRequestModel {
-
+public class ActivateAccountRequestModel
+{
     @Valid
     @Nullable
     private final Get _getRequestModel;

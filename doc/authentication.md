@@ -37,7 +37,8 @@ If the password has been previously saved by the user, the browser will autofill
 
 ## Input Validation
 
-If invalid credentials are entered, the screen is not submitted and the user must correct their input:
+If invalid credentials are entered, the screen is not submitted and the user must correct their input.\
+If a credential policy is configured the error presented to users includes policy details:
 
 ![Blank Input](images/authentication/invalid-input.png)
 
@@ -49,14 +50,14 @@ If accepted, then password autofill will work on subsequent logins.
 
 ## Code Behavior
 
-The [Request Handler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/authentication/UsernamePasswordAuthenticationRequestHandler.java) provides the plugin logic for this flow.\
+The [RequestHandler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/authentication/UsernamePasswordAuthenticationRequestHandler.java) provides the plugin logic for this flow.\
 This class is injected with the following SDK objects, which implement its main behavior:
 
 | SDK Object | Usage |
 | ---------- | ----- |
-| [Account Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine whether to display a Create Account link |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to determine whether to display a Create Account link |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to validate the username and password entered |
 | [UserPreferenceManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/UserPreferenceManager.html) | Used to load the username before authentication, and save it afterwards |
-| [Credential Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/CredentialManager.html) | Used to validate the username and password entered |
 
 The following resources can be customized as required:
 

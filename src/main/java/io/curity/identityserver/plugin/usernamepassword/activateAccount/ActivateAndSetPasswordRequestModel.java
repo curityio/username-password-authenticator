@@ -25,8 +25,8 @@ import se.curity.identityserver.sdk.web.Request;
 import java.util.Collection;
 import java.util.Optional;
 
-public class ActivateAndSetPasswordRequestModel {
-
+public class ActivateAndSetPasswordRequestModel
+{
     @Valid
     @Nullable
     private final Get _getRequestModel;

@@ -21,12 +21,19 @@ If the email link is clicked at a time after 20 minutes, the following error is 
 
 ![Expired Link](images/set-password/expired-link.png)
 
+## The Credential Policy
+
+A Credential Policy is optional but if configured these rules will be enforced:
+
+![Credential Policy](images/shared/credential-policy.png)
+
 ## Set Password Screen
 
 If the link is valid then the set password screen is invoked via a URL with this format: `/authn/authentication/set-password`.\
-The user then enters a new password and the indicator shows the password strength:
+The user then enters a new password which may need to meet a credential policy.\
+If this fails a screen of the following form is shown and the user can retry:
 
-![Set Password Screen](images/set-password/setting-password.png)
+![Password Policy Failed](images/shared/password-policy-failed.png)
 
 Once the password is updated, the following screen is displayed.\
 The user can then return to the login screen and sign in to the application.
@@ -58,9 +65,10 @@ This class is injected with the following SDK objects, which implement its main 
 | SDK Object | Usage |
 | ---------- | ----- |
 | [NonceTokenIssuer](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/NonceTokenIssuer.html) | Used to introspect the nonce received in the URL and get the account ID |
-| [Session Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/SessionManager.html) | Used to cache the nonce data after introspection, to prevent avoidable user errors |
-| [Account Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
-| [Credential Manager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/CredentialManager.html) | Used to update the password in the configured data source |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
+Used to transform the password entered to a secure format
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to update the password in the configured data source |
+| [SessionManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/SessionManager.html) | Used to cache the nonce data after introspection, to support retries |
 
 The following resources can be customized as required:
 

@@ -19,13 +19,13 @@ package io.curity.identityserver.plugin.usernamepassword.config;
 import se.curity.identityserver.sdk.config.Configuration;
 import se.curity.identityserver.sdk.config.annotation.Description;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.EmailSender;
 import se.curity.identityserver.sdk.service.ExceptionFactory;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 
 import java.util.Optional;
 
@@ -35,11 +35,8 @@ import java.util.Optional;
 @Description("A custom implementation of username password flows")
 public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
 {
-    @Description("The Credential Manager is used to verify the credentials")
-    CredentialManager getCredentialManager();
-
-    @Description("An object to manage storing and restoring the current user")
-    UserPreferenceManager getUserPreferenceManager();
+    @Description("The Credential Manager is used to verify and update credentials")
+    UserCredentialManager getCredentialManager();
 
     @Description("The Account Manager is used to fetch the account")
     AccountManager getAccountManager();
@@ -47,15 +44,13 @@ public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
     @Description("Email provider to use for 'forgot password' and 'forgot username' procedures")
     Optional<EmailSender> getEmailSender();
 
-    @Description("A nonce token issuer used in the 'forgot password' and 'set password' procedures")
+    UserPreferenceManager getUserPreferenceManager();
+
     NonceTokenIssuer getNonceTokenIssuer();
 
-    @Description("An object to manage getting information about authentication paths")
     AuthenticatorInformationProvider getAuthenticatorInformationProvider();
 
-    @Description("An object to manage storing session information")
     SessionManager getSessionManager();
 
-    @Description("An object to manage creating exceptions when invalid conditions are encountered")
     ExceptionFactory getExceptionFactory();
 }

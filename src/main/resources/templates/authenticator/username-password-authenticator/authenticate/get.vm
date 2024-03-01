@@ -44,18 +44,20 @@
 #end
 
 #define ($_body)
+#parse("fragments/credential-operation-details")
 <h2>#message("authenticator.username-password-authenticator.authenticate.view.top-header")</h2>
 <form method="post" action="$_authUrl">
 
     #if ($_errors)
         #set($_errorClass = "is-error is-error-danger")
     #end
+
     <label for="userName" class="$!_errorClass">#message("authenticator.username-password-authenticator.authenticate.view.username")</label>
     <input type="text" id="userName" name="userName" class="block full-width mb1 field-light $!_errorClass" autocapitalize="none"
            value="$!userNameValue">
 
-    <label>#message("authenticator.username-password-authenticator.authenticate.view.password")</label>
-    <input type="password" name="password" class="block full-width mb1 field-light">
+    <label for="password">#message("authenticator.username-password-authenticator.authenticate.view.password")</label>
+    <input type="password" name="password" autocomplete="current-password" class="block full-width mb1 field-light">
 
     <button type="submit" class="button button-fullwidth button-primary">#message(
         "authenticator.username-password-authenticator.authenticate.view.authenticate")</button>

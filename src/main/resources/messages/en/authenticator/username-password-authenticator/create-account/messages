@@ -30,6 +30,7 @@ error.validation.email.required=You have to enter an e-mail address
 error.validation.email.duplicate=The e-mail address you gave is already registered
 error.validation.email.invalid=The e-mail is not valid
 error.validation.phone.required=You have to enter your phone number
+error.validation.phone.duplicate=The phone number you provided is already registered
 error.validation.password.required=You have to enter a password
 error.validation.password.mismatch=Your passwords do not match
 error.validation.terms=You have to agree to the terms of service

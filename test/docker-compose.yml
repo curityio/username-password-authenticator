@@ -1,8 +1,11 @@
 version: '3.8'
 services:
 
+  #
+  # A standalone instance of the Curity Identity Server, including the usernamepassword plugin's JAR files
+  #
   curity-idsvr:
-    image: custom_curity_idsvr:7.4.0
+    image: custom_curity_idsvr:latest
     ports:
      - 6749:6749
      - 8443:8443
@@ -14,3 +17,30 @@ services:
       PASSWORD: 'Password1'
       LOGGING_LEVEL: 'INFO'
       RUNTIME_BASE_URL: "${RUNTIME_BASE_URL}"
+
+  #
+  # A JDBC data source for storing user accounts and credentials
+  #
+  curity-data:
+    image: postgres:latest
+    hostname: dbserver
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'Password1'
+      POSTGRES_DB: 'idsvr'
+
+  #
+  # An SMTP server for testing, which provides a mock email inbox for testing at http://localhost:8080
+  # 
+  #
+  smtp-server:
+    image: maildev/maildev:latest
+    hostname: smtpserver
+    environment:
+      MAILDEV_INCOMING_USER: 'noreply@example.com'
+      MAILDEV_INCOMING_PASSWORD: 'Password1'
+    ports:
+      - 1080:1080

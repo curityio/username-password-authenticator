@@ -18,6 +18,7 @@ package io.curity.identityserver.plugin.usernamepassword.registration;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.registration.RequestModel.RegistrationRequestModel;
+import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +31,12 @@ import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationResult;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
+import se.curity.identityserver.sdk.service.AccountCreationResult;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.CredentialManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
+import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
+import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
@@ -42,6 +45,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 /**
@@ -50,16 +54,15 @@ import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseMod
 public final class UsernamePasswordRegistrationRequestHandler implements RegistrationRequestHandler<RequestModel>
 {
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordRegistrationRequestHandler.class);
-
     private final AccountManager _accountManager;
-    private final CredentialManager _credentialManager;
+    private final UserCredentialManager _userCredentialManager;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final UserPreferenceManager _userPreferenceManager;
 
     public UsernamePasswordRegistrationRequestHandler(UsernamePasswordAuthenticatorPluginConfig config)
     {
         _accountManager = config.getAccountManager();
-        _credentialManager = config.getCredentialManager();
+        _userCredentialManager = config.getCredentialManager();
         _authenticatorInformationProvider = config.getAuthenticatorInformationProvider();
         _userPreferenceManager = config.getUserPreferenceManager();
     }
@@ -76,7 +79,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
             response.setResponseModel(templateResponseModel(data, "create-account/get"),
                     HttpStatus.BAD_REQUEST);
 
-            response.setResponseModel(templateResponseModel(data, "create-account/post"),
+            response.setResponseModel(templateResponseModel(emptyMap(), "create-account/post"),
                     Response.ResponseModelScope.NOT_FAILURE);
         }
         else if (request.isGetRequest())
@@ -104,7 +107,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         try
         {
             error = _accountManager.ensureNonDuplicateAccount(
-                    model.getUserName(), model.getPrimaryEmail()).orElse(null);
+                    model.getUserName(), model.getPrimaryEmail(), model.getPrimaryPhoneNumber()).orElse(null);
         }
         catch (RuntimeException e)
         {
@@ -126,15 +129,8 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
     private Optional<RegistrationResult> createAccount(RegistrationRequestModel requestModel, Response response)
     {
-        // never give a plain-text password to the account directly, use a CredentialManager to transform
-        // (hash, salt etc.) the password
         String password = requestModel.getPassword();
-        String transformedPassword = _credentialManager.transform(requestModel.getUserName(), password, null);
-
-        AccountAttributes modelAccount = AccountAttributes.of(
-                requestModel.getUserName(),
-                transformedPassword,
-                requestModel.getPrimaryEmail())
+        AccountAttributes modelAccount = AccountAttributes.of(requestModel.getUserName(), password, requestModel.getPrimaryEmail())
                 .withActive(false);
 
         String firstName = trimmed(requestModel.getFirstName());
@@ -155,7 +151,16 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
-            _accountManager.createAccount(account);
+            // Use the easiest to manage technique from the 9.0 documentation to save the user and password
+            // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#account-creation-using-the-accountmanager-service
+            var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
+            if (accountResult instanceof AccountCreationResult.CredentialRejected rejected)
+            {
+                response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
+                CredentialOperations.onCredentialUpdateRejected(response, rejected.getCredentialResult().getDetails());
+                onPostRequestValidationError(response, requestModel);
+                return Optional.empty();
+            }
         }
         catch (ExternalServiceException e)
         {
@@ -163,7 +168,8 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
             // Add a generic error to the response's errors array to avoid a backend error
             // being shown to users in the form.
-            response.addErrorMessage(ErrorMessage.withMessage("An error has occurred while creating a new account. " +
+            response.addErrorMessage(ErrorMessage.withMessage(
+                    "An error has occurred while creating a new account. " +
                     "Please try again and contact us if you still have problems."));
 
             // by adding an error to the response above, we ensure an error response will be returned
@@ -217,5 +223,4 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
                 .map(String::trim)
                 .orElse("");
     }
-
 }
