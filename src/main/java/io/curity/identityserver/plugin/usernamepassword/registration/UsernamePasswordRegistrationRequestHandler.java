@@ -29,9 +29,9 @@ import se.curity.identityserver.sdk.attribute.scim.v2.multivalued.PhoneNumber;
 import se.curity.identityserver.sdk.authentication.ActivationResult;
 import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationResult;
+import se.curity.identityserver.sdk.errors.CredentialUpdateException;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
-import se.curity.identityserver.sdk.service.AccountCreationResult;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
@@ -151,16 +151,14 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
-            // Use the easiest to manage technique from the 9.0 documentation to save the user and password
-            // https://curity.io/docs/idsvr/latest/system-admin-guide/upgrade/8_7_X_to_9_0_0.html#account-creation-using-the-accountmanager-service
-            var accountResult = _accountManager.withCredentialManager(_userCredentialManager).create(account);
-            if (accountResult instanceof AccountCreationResult.CredentialRejected rejected)
-            {
-                response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
-                CredentialOperations.onCredentialUpdateRejected(response, rejected.getCredentialResult().getDetails());
-                onPostRequestValidationError(response, requestModel);
-                return Optional.empty();
-            }
+            _accountManager.withCredentialManager(_userCredentialManager).createAccount(account);
+        }
+        catch (CredentialUpdateException e)
+        {
+            response.addErrorMessage(ErrorMessage.withMessage(CredentialUpdateResult.Rejected.CODE));
+            CredentialOperations.onCredentialUpdateRejected(response, e.getReason().getDetails());
+            onPostRequestValidationError(response, requestModel);
+            return Optional.empty();
         }
         catch (ExternalServiceException e)
         {
