@@ -49,7 +49,7 @@ public class AuthenticateGetRepresentationFunction implements RepresentationFunc
         Optional<String> username = model.getOptionalString("_username");
 
         return factory.newAuthenticationStep(step -> {
-            step.addMessage(MSG_HEADER);
+            step.addMessage(MSG_HEADER, HaapiContract.MessageClasses.HEADING);
             step.addFormAction(HaapiContract.Actions.Kinds.LOGIN, URI.create(authUrl),
                     HttpMethod.POST,
                     MediaType.X_WWW_FORM_URLENCODED,

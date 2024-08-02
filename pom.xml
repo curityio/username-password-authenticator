@@ -21,7 +21,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.curity.identityserver.plugin</groupId>
     <artifactId>identityserver.plugins.authenticators.usernamepassword</artifactId>
-    <version>4.1.0</version>
+    <version>4.2.0</version>
     <packaging>jar</packaging>
     <name>Username Password Authenticator</name>
 
