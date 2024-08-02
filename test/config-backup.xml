@@ -343,7 +343,7 @@
           <client-store>
             <config-backed>
               <client>
-                <id>demo-client</id>
+                <id>demo-web-client</id>
                 <secret>$5$zxvo.QC9MPF6MAC.$8xE/aSWS4vcHAeskxyEzCa.p1e2NQ1b.pI4zKF5GBkC</secret>
                 <redirect-uris>https://oauth.tools/callback/code</redirect-uris>
                 <scope>openid</scope>

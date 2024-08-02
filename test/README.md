@@ -45,9 +45,12 @@ Browse to https://oauth.tools and create an environment from the metadata URL:
 
 ![OAuth Tools Configuration](images/oauthtools-configuration.png)
 
-In the `Code Flow` window, configure the three values highlighted below:
+Add a `code flow` and configure these values:
 
-![OAuth Tools Configuration](images/codeflow-settings.png)
+- client ID: demo-web-client
+- client secret: Password1
+- scope: openid
+- prompt: login
 
 ## Configure the Curity Identity Server
 
