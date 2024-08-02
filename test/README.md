@@ -59,7 +59,7 @@ From the `Facilities` menu, configure the account manager options according to y
 
 ![Account Manager](../doc/images/shared/account-manager.png)
 
-## Test Password Flows
+## Test Password Operations for Browser-Based Flows
 
 Run a code flow from OAuth tools to perform end-to-end testing of password flows.\
 Whenever the system is deployed, select `Create Account` and register a user:
@@ -74,7 +74,21 @@ Activate the user if required, then test logins and account recovery behaviour:
 
 ![Authenticate](../doc/images/authentication/initial.png)
 
-## User Account and Credential Data
+## Test Password Operations with Native Forms using the Hypermedia Authentication API
+
+Clone the HAAPI code examples with these commands:
+
+```bash
+git clone https://github.com/curityio/android-haapi-ui-sdk-demo
+git clone https://github.com/curityio/ios-haapi-ui-sdk-demo
+```
+
+Edit configuration files and change the base URL to the ngrok value, then run the apps:
+
+- For Android, the configuration file is at `app/src/main/java/io/curity/haapidemo/Configuration.kt`.
+- For iOS, the configuration file is at `iOS/Configuration.swift`.
+
+## Query User Account and Credential Data
 
 Get a shell to the postgres Docker container:
 
@@ -83,7 +97,7 @@ POSTGRES_CONTAINER_ID=$(docker ps | grep postgres | awk '{print $1}')
 docker exec -it $POSTGRES_CONTAINER_ID bash
 ```
 
-Then connect to the database
+Then connect to the database:
 
 ```bash
 export PGPASSWORD=Password1 && psql -p 5432 -d idsvr -U postgres

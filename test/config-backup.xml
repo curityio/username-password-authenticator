@@ -359,6 +359,57 @@
                 </capabilities>
                 <validate-port-on-loopback-interfaces>true</validate-port-on-loopback-interfaces>
               </client>
+              <client>
+                <id>haapi-ios-dev-client</id>
+                <client-name>Haapi iOS Client</client-name>
+                <no-authentication>true</no-authentication>
+                <redirect-uris>haapi:start</redirect-uris>
+                <user-authentication>
+                </user-authentication>
+                <scope>address</scope>
+                <scope>email</scope>
+                <scope>openid</scope>
+                <scope>phone</scope>
+                <scope>profile</scope>
+                <capabilities>
+                  <code/>
+                  <haapi>
+                    <issue-token-bound-authorization-code>true</issue-token-bound-authorization-code>
+                  </haapi>
+                </capabilities>
+                <attestation>
+                  <disable-attestation-validation>true</disable-attestation-validation>
+                  <ios>
+                    <app-id>XYZ</app-id>
+                    <ios-policy>ios-dev-policy</ios-policy>
+                  </ios>
+                </attestation>
+              </client>
+              <client>
+                <id>haapi-android-client</id>
+                <client-name>Haapi Android Client</client-name>
+                <no-authentication>true</no-authentication>
+                <redirect-uris>app://haapi</redirect-uris>
+                <audience>haapi-client</audience>
+                <scope>address</scope>
+                <scope>email</scope>
+                <scope>openid</scope>
+                <scope>phone</scope>
+                <scope>profile</scope>
+                <capabilities>
+                  <code/>
+                  <haapi>
+                    <issue-token-bound-authorization-code>true</issue-token-bound-authorization-code>
+                  </haapi>
+                </capabilities>
+                <attestation>
+                  <android>
+                    <package-name>io.curity.haapidemo</package-name>
+                    <signature-digest>Z2DKEZO2XWFWQnApoRCzhqhIxzODe7BUsArj4Up9oKQ=</signature-digest>
+                    <android-policy>android-dev-policy</android-policy>
+                  </android>
+                </attestation>
+              </client>
             </config-backed>
           </client-store>
         </authorization-server>
@@ -416,6 +467,20 @@
     </profile>
   </profiles>
   <facilities xmlns="https://curity.se/ns/conf/base">
+    <client-attestation>
+      <ios-policy xmlns="https://curity.se/ns/conf/client-attestation">
+        <id>ios-dev-policy</id>
+        <mode>non-production</mode>
+      </ios-policy>
+      <android-policy xmlns="https://curity.se/ns/conf/client-attestation">
+        <id>android-dev-policy</id>
+        <verify-boot-state>false</verify-boot-state>
+        <minimum-security-level>software</minimum-security-level>
+        <override-certificate-chain-validation>
+          <do-not-validate-certificate-chain/>
+        </override-certificate-chain-validation>
+      </android-policy>
+    </client-attestation>
     <data-sources>
       <data-source>
         <id>default-datasource</id>
