@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
+import se.curity.identityserver.sdk.haapi.ProblemContract;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
@@ -32,13 +33,16 @@ import se.curity.identityserver.sdk.service.credential.CredentialVerificationRes
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
+import se.curity.identityserver.sdk.web.ResponseModel;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static se.curity.identityserver.sdk.web.Response.ResponseModelScope.NOT_FAILURE;
+import static se.curity.identityserver.sdk.web.ResponseModel.mapResponseModel;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
 /**
@@ -116,8 +120,10 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
             case CredentialVerificationResult.Rejected rejected ->
             {
                 response.addErrorMessage(ErrorMessage.withMessage("validation.error.incorrect.credentials"));
+                var errorModel = ResponseModel.problemResponseModel(ProblemContract.Types.IncorrectCredentials.TYPE);
+                response.setResponseModel(errorModel, Response.ResponseModelScope.FAILURE);
+
                 CredentialOperations.onCredentialUpdateRejected(response, rejected.getDetails());
-                response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(), Response.ResponseModelScope.FAILURE);
             }
         }
 
@@ -130,8 +136,8 @@ public final class UsernamePasswordAuthenticationRequestHandler implements Authe
         if (request.isPostRequest())
         {
             var model = new RequestModel.Post(request);
-            response.putViewData(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError(),
-                    Response.ResponseModelScope.FAILURE);
+            var errorModel = mapResponseModel(Map.of(ViewModelReservedKeys.FORM_POST_BACK, model.dataOnError()));
+            response.setResponseModel(errorModel, HttpStatus.BAD_REQUEST);
         }
     }
 }
