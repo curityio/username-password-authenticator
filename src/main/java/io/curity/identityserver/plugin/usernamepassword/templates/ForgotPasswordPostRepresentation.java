@@ -49,48 +49,29 @@ public class ForgotPasswordPostRepresentation implements RepresentationFunction
     {
         return factory.newAuthenticationStep(builder -> {
             builder.addMessage(MSG_FURTHER_INSTRUCTIONS, HaapiContract.MessageClasses.HEADING);
-            Message recipientOfCommunication = Message.ofLiteral(
-                    mask(model.getString(RECIPIENT_OF_COMMUNICATION)));
+            Message recipientOfCommunication = Message.ofLiteral(mask(model.getString(RECIPIENT_OF_COMMUNICATION)));
             builder.addMessage(recipientOfCommunication, HaapiContract.MessageClasses.RECIPIENT_OF_COMMUNICATION);
             builder.addMessage(MSG_NO_EMAIL);
             builder.addMessage(MSG_CHECK_SPAM_FOLDER);
 
-            builder.addLink(
-                    URI.create(model.getString("_authUrl")),
-                    HaapiContract.Links.Relations.RESTART,
-                    MSG_CONTINUE
-            );
+            builder.addLink(URI.create(model.getString("_authUrl")), HaapiContract.Links.Relations.RESTART, MSG_CONTINUE);
         });
     }
 
     private static String mask(String recipientOfCommunication)
     {
-        if (StringUtils.isBlank(recipientOfCommunication))
-        {
-            // to prevent attackers phishing for valid email accounts, pretend an email was sent to some random address
-            recipientOfCommunication = RandomStringUtils.random(12, true, true);
-        }
-        Set<Integer> groupsToReplaceSet = new HashSet<>(Arrays.asList(2, 5));
-        Matcher matcher = Pattern.compile("(.*?)([^@]{1,4})(@)(.*?)([^.]{1,4})(\\.)?(.*)?").matcher(recipientOfCommunication);
+        int atIndex = recipientOfCommunication.indexOf("@");
+        String prefix = recipientOfCommunication.substring(0, atIndex);
+        String domain = recipientOfCommunication.substring(atIndex + 1);
 
-        if (matcher.matches())
-        {
-            List<String> result = new ArrayList<>(matcher.groupCount());
-            for (int i = 1; i <= matcher.groupCount(); i++)
-            {
-                @Nullable String group = matcher.group(i);
-                if (group == null)
-                {
-                    continue;
-                }
-                result.add(groupsToReplaceSet.contains(i) ? StringUtils.repeat("x", group.length()) : group);
-            }
+        // Masking one-third of the prefix
+        int prefixOneThirdLength = Math.max(1, prefix.length() / 3);
+        String maskedPrefix = prefix.substring(0, prefixOneThirdLength) + "****";
 
-            return String.join("", result);
-        }
-        else
-        {
-            return recipientOfCommunication;
-        }
+        // Masking one-third of the domain
+        int domainOneThirdLength = Math.max(1, domain.length() / 3);
+        String maskedDomain = domain.substring(0, domainOneThirdLength) + "****";
+
+        return maskedPrefix + "@" + maskedDomain;
     }
 }
