@@ -32,7 +32,7 @@
         <project.hibernateValidatorVersion>7.0.3.Final</project.hibernateValidatorVersion>
         <project.guavaVersion>33.0.0-jre</project.guavaVersion>
         <project.gsonVersion>2.10.1</project.gsonVersion>
-        <project.apacheCommonsVersion>3.14.0</project.apacheCommonsVersion>
+        <project.apacheCommonsVersion>3.18.0</project.apacheCommonsVersion>
     </properties>
 
     <build>
