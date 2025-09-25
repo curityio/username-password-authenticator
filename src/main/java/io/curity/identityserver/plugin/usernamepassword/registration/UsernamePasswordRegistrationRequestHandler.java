@@ -151,7 +151,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         try
         {
-            _accountManager.withCredentialManager(_userCredentialManager).createAccount(account);
+         account = _accountManager.withCredentialManager(_userCredentialManager).createAccount(account);
         }
         catch (CredentialUpdateException e)
         {
