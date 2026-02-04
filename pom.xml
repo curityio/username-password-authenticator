@@ -21,18 +21,18 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.curity.identityserver.plugin</groupId>
     <artifactId>identityserver.plugins.authenticators.usernamepassword</artifactId>
-    <version>4.2.0</version>
+    <version>4.2.1</version>
     <packaging>jar</packaging>
     <name>Username Password Authenticator</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.curityVersion>9.2.0</project.curityVersion>
-        <project.slf4jVersion>2.0.3</project.slf4jVersion>
+        <project.slf4jVersion>2.0.12</project.slf4jVersion>
         <project.hibernateValidatorVersion>7.0.3.Final</project.hibernateValidatorVersion>
-        <project.guavaVersion>33.0.0-jre</project.guavaVersion>
-        <project.gsonVersion>2.10.1</project.gsonVersion>
-        <project.apacheCommonsVersion>3.14.0</project.apacheCommonsVersion>
+        <project.guavaVersion>33.5.0-jre</project.guavaVersion>
+        <project.gsonVersion>2.13.2</project.gsonVersion>
+        <project.apacheCommonsVersion>3.20.0</project.apacheCommonsVersion>
     </properties>
 
     <build>
@@ -108,4 +108,11 @@
             <version>${project.apacheCommonsVersion}</version>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>customer-release-repo</id>
+            <name>Customer Release Repository</name>
+            <url>https://hub.curityio.net/repository/curity-release-repo/</url>
+        </repository>
+    </distributionManagement>
 </project>
