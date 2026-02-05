@@ -16,8 +16,6 @@
 
 package io.curity.identityserver.plugin.usernamepassword.templates;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 import se.curity.identityserver.sdk.haapi.HaapiContract;
 import se.curity.identityserver.sdk.haapi.Message;
 import se.curity.identityserver.sdk.haapi.RepresentationFactory;
@@ -25,15 +23,7 @@ import se.curity.identityserver.sdk.haapi.RepresentationFunction;
 import se.curity.identityserver.sdk.haapi.RepresentationModel;
 import se.curity.identityserver.sdk.web.Representation;
 
-import javax.annotation.Nullable;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION;
 
