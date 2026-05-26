@@ -20,14 +20,14 @@ docker pull curity.azurecr.io/curity/idsvr
 ```
 
 Whenever you change the plugin code, build it into deployable JAR files.\
-The build script does so by producing a custom Docker image for the Curity Identity Server:
+The build script builds the JAR files and creates a custom Docker image for the Curity Identity Server with the plugin:
 
 ```bash
 ./test/build.sh
 ```
 
 The example deployment enables the internet based OAuth Tools to be used as a test client.\
-The deployment script uses ngrok to expose port 8443 of the local identity server to OAuth Tools:
+The deployment script uses ngrok to expose port 8443 of the local Curity Identity Server to OAuth Tools:
 
 ```bash
 ./test/deploy.sh
@@ -62,18 +62,23 @@ From the `Facilities` menu, configure the account manager options according to y
 
 ![Account Manager](../doc/images/shared/account-manager.png)
 
+For example, select `email-verification` as the account verification method. The deployment already includes a mock SMTP server called `smtp` that you can select.
+
 ## Test Password Operations for Browser-Based Flows
 
 Run a code flow from OAuth tools to perform end-to-end testing of password flows.\
-Whenever the system is deployed, select `Create Account` and register a user:
+
+Select one of the supported password flows. To test the custom plugin, select `usernamepassword`
+
+The deployment config does not contain any user account. For new deployments, therefore, select `Create Account` and register a user:
 
 ![Create Account](images/login.png)
 
-A mock SMTP server is provided, and you can process emails by browsing to `http://localhost:8080`:
+Activate the user if required. You can access account verification emails by browsing to the mock SMTP server at `http://localhost:1080`:
 
 ![Email Inbox](images/email-inbox.png)
 
-Activate the user if required, then test logins and account recovery behaviour:
+Test logins and account recovery behavior: 
 
 ![Authenticate](../doc/images/authentication/initial.png)
 
@@ -88,7 +93,7 @@ git clone https://github.com/curityio/ios-haapi-ui-sdk-demo
 
 Edit configuration files and change the base URL to the ngrok value, then run the apps:
 
-- For Android, the configuration file is at `app/src/main/java/io/curity/haapidemo/Configuration.kt`.
+- For Android, the configuration file is at `app/src/main/java/io/curity/haapidemo/ Configuration.kt`.
 - For iOS, the configuration file is at `iOS/Configuration.swift`.
 
 ## Query User Account and Credential Data
