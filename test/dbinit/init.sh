@@ -23,21 +23,11 @@ echo 'Waiting for the database server to reach a ready state ...'
 sleep 5
 
 #
-# Create the schema if it does not exist
+# Create the schema if it does not exist, or upgrade it otherwise
 #
 echo 'Initializing the database schema if required ...'
 /opt/idsvr/bin/idsvr -I
 if [ $? -ne 0 ]; then
   echo 'Problem encountered creating the database schema'
-  exit 1
-fi
-
-#
-# Upgrade the schema to the latest product version if required
-#
-echo 'Upgrading the database schema if required ...'
-/opt/idsvr/bin/idsvr -L default
-if [ $? -ne 0 ]; then
-  echo 'Problem encountered upgrading the database schema'
   exit 1
 fi
