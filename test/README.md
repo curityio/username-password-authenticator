@@ -1,11 +1,11 @@
 # Test the Plugin
 
-The below deployment uses the ngrok tool to enable a productive test setup when working on the plugin.\
+The below deployment uses the ngrok tool to enable a productive test setup when working on the plugin.  
 If preferred, the deployment can be studied and adapted to your own requirements.
 
 ## Prerequisites
 
-Download a `license.json` file for the Curity Identity Server and copy it into the `test` folder.\
+Download a `license.json` file for the Curity Identity Server and copy it into the `test` folder.  
 Also ensure that these tools are installed on your local computer:
 
 - [Docker](https://www.docker.com/products/docker-desktop)
@@ -19,15 +19,15 @@ First do a docker pull to ensure that your latest tag for the Curity Identity Se
 docker pull curity.azurecr.io/curity/idsvr
 ```
 
-Whenever you change the plugin code, build it into deployable JAR files.\
-The build script does so by producing a custom Docker image for the Curity Identity Server:
+Whenever you change the plugin code, build it into deployable JAR files.  
+The build script builds the JAR files and creates a custom Docker image for the Curity Identity Server with the plugin:
 
 ```bash
 ./test/build.sh
 ```
 
-The example deployment enables the internet based OAuth Tools to be used as a test client.\
-The deployment script uses ngrok to expose port 8443 of the local identity server to OAuth Tools:
+The example deployment enables the internet based OAuth Tools to be used as a test client.  
+The deployment script uses ngrok to expose port 8443 of the local Curity Identity Server to OAuth Tools:
 
 ```bash
 ./test/deploy.sh
@@ -62,18 +62,24 @@ From the `Facilities` menu, configure the account manager options according to y
 
 ![Account Manager](../doc/images/shared/account-manager.png)
 
+For example, select `email-verification` as the account verification method.   
+The deployment already includes a mock SMTP server called `smtp` that you can select.
+
 ## Test Password Operations for Browser-Based Flows
 
-Run a code flow from OAuth tools to perform end-to-end testing of password flows.\
-Whenever the system is deployed, select `Create Account` and register a user:
+Run a code flow from OAuth tools to perform end-to-end testing of password flows.  
+
+Select one of the supported password flows. To test the custom plugin, select `usernamepassword`
+
+The deployment config does not contain any user account. For new deployments, therefore, select `Create Account` and register a user:
 
 ![Create Account](images/login.png)
 
-A mock SMTP server is provided, and you can process emails by browsing to `http://localhost:8080`:
+Activate the user if required. You can access account verification emails by browsing to the mock SMTP server at `http://localhost:1080`:
 
 ![Email Inbox](images/email-inbox.png)
 
-Activate the user if required, then test logins and account recovery behaviour:
+Test logins and account recovery behavior: 
 
 ![Authenticate](../doc/images/authentication/initial.png)
 

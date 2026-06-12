@@ -25,15 +25,31 @@ services:
     image: postgres:latest
     hostname: dbserver
     volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./data:/var/lib/postgresql/
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'Password1'
       POSTGRES_DB: 'idsvr'
 
   #
-  # An SMTP server for testing, which provides a mock email inbox for testing at http://localhost:8080
+  # A job container to initialize the database schema and import test user accounts
+  #
+  curity-data-init:
+    image: curity.azurecr.io/curity/idsvr:latest
+    hostname: dbserverinit
+    volumes:
+      - ./dbinit/init.sh:/tmp/init.sh
+    command: ["/tmp/init.sh"]
+    environment:
+      JDBC_URL: jdbc:postgresql://dbserver:5432/idsvr
+      JDBC_USERNAME: 'postgres'
+      JDBC_PASSWORD: 'Password1'
+    depends_on:
+      curity-data:
+        condition: service_started
+
+  #
+  # An SMTP server for testing, which provides a mock email inbox for testing at http://localhost:1080
   # 
   #
   smtp-server:
