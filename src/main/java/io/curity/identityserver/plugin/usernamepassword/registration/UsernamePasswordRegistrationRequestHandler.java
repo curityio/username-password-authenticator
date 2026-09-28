@@ -117,7 +117,7 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
 
         if (error != null)
         {
-            response.addErrorMessage(error);
+            response.addErrorMessage(toFormFieldError(error));
             onPostRequestValidationError(response, model);
             return Optional.empty();
         }
@@ -190,6 +190,20 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         response.setHttpStatus(HttpStatus.CREATED);
 
         return Optional.empty();
+    }
+
+    /**
+     * The account manager reports duplicates on its own parameter names; report them on the form fields instead,
+     * so that clients (e.g. HAAPI clients) can show the error next to the right field.
+     */
+    private static ErrorMessage toFormFieldError(ErrorMessage error)
+    {
+        return switch (error.getMessage())
+        {
+            case "error.validation.accountId.duplicate" -> ErrorMessage.invalidParameter("userName", error.getMessage());
+            case "error.validation.email.duplicate" -> ErrorMessage.invalidParameter("primaryEmail", error.getMessage());
+            default -> error;
+        };
     }
 
     @Override

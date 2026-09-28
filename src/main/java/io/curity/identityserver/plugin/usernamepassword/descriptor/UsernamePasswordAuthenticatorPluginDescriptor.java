@@ -33,6 +33,8 @@ import io.curity.identityserver.plugin.usernamepassword.templates.ForgotAccountI
 import io.curity.identityserver.plugin.usernamepassword.templates.ForgotAccountIdPostRepresentation;
 import io.curity.identityserver.plugin.usernamepassword.templates.ForgotPasswordGetRepresentation;
 import io.curity.identityserver.plugin.usernamepassword.templates.ForgotPasswordPostRepresentation;
+import io.curity.identityserver.plugin.usernamepassword.templates.SetPasswordGetRepresentation;
+import io.curity.identityserver.plugin.usernamepassword.templates.SetPasswordPostRepresentation;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.authentication.RegistrationRequestHandler;
@@ -113,6 +115,8 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
                 .put("forgot-account-id/post", ForgotAccountIdPostRepresentation.class)
                 .put("forgot-password/get", ForgotPasswordGetRepresentation.class)
                 .put("forgot-password/post", ForgotPasswordPostRepresentation.class)
+                .put("set-password/get", SetPasswordGetRepresentation.class)
+                .put("set-password/post", SetPasswordPostRepresentation.class)
                 .build();
     }
 }

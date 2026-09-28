@@ -146,7 +146,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         else
         {
             _logger.debug("OTP was not accepted");
-            response.addErrorMessage(ErrorMessage.withMessage("validation.error.otp.invalid"));
+            response.addErrorMessage(ErrorMessage.invalidParameter(RequestModel.Post.OTP_PARAM, "validation.error.otp.invalid"));
         }
 
         putStepViewData(response);
