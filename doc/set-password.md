@@ -70,17 +70,17 @@ This ensures that if a user accidentally closes the password reset page they can
 
 ## Code Behavior
 
-The [Request Handler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/setPassword/UsernamePasswordSetPasswordRequestHandler.java) provides the plugin logic for this flow.\
+The [Request Handler](../src/main/java/io/curity/identityserver/plugin/usernamepassword/setPassword/UsernamePasswordSetPasswordRequestHandler.java) provides the plugin logic for this flow.
 This class is injected with the following SDK objects, which implement its main behavior:
 
-| SDK Object | Usage |
-| ---------- | ----- |
-| [NonceTokenIssuer](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/NonceTokenIssuer.html) | Used to introspect the nonce once the OTP is verified and get the account ID |
-| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html) | Used to get the account object from the account ID |
-Used to transform the password entered to a secure format
-| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to update the password in the configured data source |
-| [SessionManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/SessionManager.html) | Used to hold the pending OTP, and the account ID once the OTP is verified |
-| [Throttler](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/Throttler.html) | Used to throttle OTP verification attempts |
+| SDK Object                                                                                                                                              | Usage                                                                     |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [NonceTokenIssuer](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/NonceTokenIssuer.html)                      | Used to introspect the nonce when the OTP is verified                     |
+| [AccountManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/AccountManager.html)                          | Used to get the account object from the account ID                        |
+| [PasswordTransformer](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/PasswordTransformer.html)     | Used to transform the password entered to a secure format                 |
+| [UserCredentialManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/credential/UserCredentialManager.html) | Used to update the password in the configured data source                 |
+| [SessionManager](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/SessionManager.html)                          | Used to hold the pending OTP, and the account ID once the OTP is verified |
+| [Throttler](https://curity.io/docs/idsvr-java-plugin-sdk/latest/se/curity/identityserver/sdk/service/Throttler.html)                                    | Used to throttle OTP verification attempts                                |
 
 The following resources can be customized as required:
 
