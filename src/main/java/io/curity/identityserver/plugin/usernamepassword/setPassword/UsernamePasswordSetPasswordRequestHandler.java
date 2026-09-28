@@ -193,7 +193,6 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
             return new UpdatePasswordResult.InvalidAccount();
         }
 
-        account = account.withPassword(password);
         CredentialUpdateResult result = _userCredentialManager.update(SubjectAttributes.of(account.getUserName()), password);
         if (result instanceof CredentialUpdateResult.Rejected rejected)
         {

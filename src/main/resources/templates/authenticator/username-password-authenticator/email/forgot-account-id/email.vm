@@ -39,7 +39,7 @@
 
 #define($_body)    
     <h2 style="font-family: sans-serif; font-size: 20px; font-weight: normal; margin: 0; Margin-bottom: 15px;">#message("authenticator.username-password-authenticator.email.forgot-account-id.email.head1")</h2>
-    <p>#message("authenticator.username-password-authenticator.email.forgot-account-id.email.p1") $accountId</p>
+    <p>#message("authenticator.username-password-authenticator.email.forgot-account-id.email.p1") $_tr.encodeHtml($accountId)</p>
 #end
 
 #*
