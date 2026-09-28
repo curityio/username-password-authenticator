@@ -36,7 +36,31 @@
 ##set($title = "")
 
 #define($_body)
-    #if (!($_nonce_is_invalid))
+    #if ($_nonce_is_invalid)
+        <form>
+            <div class="alert alert-danger">#message(
+                "authenticator.username-password-authenticator.set-password.validation.error.token.invalid")</div>
+        </form>
+    #elseif ($_otp_required)
+        <form method="post">
+
+            <div class="center">
+                <h1>#message("authenticator.username-password-authenticator.set-password.view.otp.head1")</h1>
+                <p>#message("authenticator.username-password-authenticator.set-password.view.otp.p1")</p>
+            </div>
+
+            <label for="otp">#message("authenticator.username-password-authenticator.set-password.view.otp")</label>
+            <input class="block full-width mb1 field-light" type="text" id="otp" name="otp" inputmode="numeric"
+                   pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" autofocus/>
+
+            <button type="submit" class="button button-primary button-fullwidth">#message("authenticator.username-password-authenticator.set-password.view.otp.button")</button>
+
+            <div class="login-actions center py2">
+                <a href="$_authUrl">#message("authenticator.username-password-authenticator.set-password.view.cancel")</a>
+            </div>
+
+        </form>
+    #else
         #parse("fragments/credential-operation-details")
         <form method="post">
 
@@ -59,11 +83,6 @@
                 <a href="$_authUrl">#message("authenticator.username-password-authenticator.set-password.view.cancel")</a>
             </div>
 
-        </form>
-    #else
-        <form>
-            <div class="alert alert-danger">#message(
-                "authenticator.username-password-authenticator.set-password.validation.error.token.invalid")</div>
         </form>
     #end
 

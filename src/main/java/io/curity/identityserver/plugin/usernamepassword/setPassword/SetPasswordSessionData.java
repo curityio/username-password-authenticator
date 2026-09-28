@@ -32,25 +32,11 @@ public final class SetPasswordSessionData
         _data = null;
     }
 
-    public void write(String token, String accountId)
+    public void write(String accountId)
     {
-        Data data = new Data(token, accountId);
+        Data data = new Data(accountId);
         String jsonData = new Gson().toJson(data);
         _sessionManager.put(Attribute.of("nonceData", jsonData));
-    }
-
-    public boolean hasToken(String token)
-    {
-        Attribute nonceData = _sessionManager.get("nonceData");
-        if (nonceData != null) {
-
-            _data = new Gson().fromJson(nonceData.getValue().toString(), Data.class);
-            if (_data != null && StringUtils.isNotBlank(_data.token) && _data.token.equals(token)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public String readAccountId()
@@ -74,13 +60,11 @@ public final class SetPasswordSessionData
 
     private static class Data
     {
-        public Data(String tokenInput, String accountIdInput)
+        public Data(String accountIdInput)
         {
-            token = tokenInput;
             accountId = accountIdInput;
         }
 
-        public String token;
         public String accountId;
     }
 }

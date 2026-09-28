@@ -32,9 +32,13 @@
  *###
 ## The title of this page can be overridden by setting the $title variable here to a resource string or the actual value
 ##set($title = "")
-#set ($url = "$_setPasswordUrl?token=$nonce$!oq")
+#set ($url = $_setPasswordUrl)
 #define($_body)
-    #message("authenticator.username-password-authenticator.email.reset-password.email.head1")
+    #message("authenticator.username-password-authenticator.email.forgot-password.email.head1")
+
+$otp
+
+#message("authenticator.username-password-authenticator.email.forgot-password.email.p1")
 
 $url
 #end

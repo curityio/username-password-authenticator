@@ -1,4 +1,5 @@
 email.subject=Reset your password
 email.title=Forgot Password
-email.head1=Click the button below to reset your password
-email.button=Reset Password
+email.head1=Use the following code to reset your password
+email.button=Enter Code
+email.p1=Enter the code in the same browser where you requested the password reset. The code is only valid for a short period of time.

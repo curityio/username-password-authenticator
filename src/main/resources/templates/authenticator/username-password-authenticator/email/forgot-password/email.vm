@@ -37,10 +37,12 @@
 
 #set ($logo_email_path = $_baseUrl + '/assets/images/example-logo.png')
 
-#set ($url = "$_setPasswordUrl?token=$nonce$!oq")
+#set ($url = $_setPasswordUrl)
 
 #define($_body)
     <p>#message("authenticator.username-password-authenticator.email.forgot-password.email.head1")</p>
+    <p style="font-family: Roboto-Medium, sans-serif; font-size: 2em; letter-spacing: .3em; text-align: center;">$otp</p>
+    <p>#message("authenticator.username-password-authenticator.email.forgot-password.email.p1")</p>
     <a style="-webkit-font-smoothing: antialiased;transition: all .3s ease;border-radius: 8px;background: #323c53; font-weight: 400;
 color: #fff; border: none; cursor: pointer; display: block; font-size: 1em; line-height: 1.86875rem; padding: .575rem 1.15rem; font-family: Roboto-Medium, sans-serif; text-align: center; -moz-osx-font-smoothing: grayscale; text-decoration: none;" href="$url">#message("authenticator.username-password-authenticator.email.forgot-password.email.button")</a>
 

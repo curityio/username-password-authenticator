@@ -19,7 +19,9 @@ package io.curity.identityserver.plugin.usernamepassword.forgotPassword;
 import com.google.common.html.HtmlEscapers;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
+import io.curity.identityserver.plugin.usernamepassword.setPassword.SetPasswordSessionData;
 import io.curity.identityserver.plugin.usernamepassword.utils.NullEmailSender;
+import io.curity.identityserver.plugin.usernamepassword.utils.OtpHelper;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.EmailSender;
 import se.curity.identityserver.sdk.service.ExceptionFactory;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
+import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.web.Request;
@@ -74,6 +77,9 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     private final NonceTokenIssuer _nonceTokenIssuer;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final ExceptionFactory _exceptionFactory;
+    private final SessionManager _sessionManager;
+    private final OtpHelper _otpHelper;
+    private final Duration _otpTimeToLive;
 
     public UsernamePasswordForgotPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
@@ -82,6 +88,9 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
         _exceptionFactory = configuration.getExceptionFactory();
+        _sessionManager = configuration.getSessionManager();
+        _otpHelper = new OtpHelper(_sessionManager, _nonceTokenIssuer, configuration.getThrottler());
+        _otpTimeToLive = Duration.ofSeconds(configuration.getOtpTimeToLive());
 
         if (configuration.getEmailSender().isPresent())
         {
@@ -149,10 +158,30 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         }
 
         @Nullable String emailValue = AccountAttributes.emailFrom(account);
+        boolean accountFound = account != null && emailValue != null;
 
-        if (account != null && emailValue != null)
+        // throttle on the account when it exists, otherwise on the entered value, so both cases behave the same
+        @Nullable String throttlingKey = accountFound ? account.getUserName()
+                : StringUtils.isNotBlank(username) ? username : emailAddress;
+
+        if (StringUtils.isNotBlank(throttlingKey) && _otpHelper.isSendingThrottled(throttlingKey))
         {
-            onAccountFound(response, emailValue, account);
+            // keep any OTP already sent valid, and do not send a new one
+            response.addErrorMessage(ErrorMessage.withMessage("error.throttled"));
+            return Optional.empty();
+        }
+
+        // a new request replaces any password reset already in progress in this session
+        new SetPasswordSessionData(_sessionManager).remove();
+
+        var setPasswordUrl = String.format("%s/set-password",
+                _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
+        response.putViewData(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, setPasswordUrl,
+                Response.ResponseModelScope.NOT_FAILURE);
+
+        if (accountFound)
+        {
+            onAccountFound(response, emailValue, account, setPasswordUrl);
         }
         else
         {
@@ -162,14 +191,14 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         return Optional.empty();
     }
 
-    private void onAccountFound(Response response, String emailValue, AccountAttributes account) {
+    private void onAccountFound(Response response, String emailValue, AccountAttributes account,
+                                String setPasswordUrl)
+    {
+        String otp = OtpHelper.generateOtp();
+        _otpHelper.store(issueNonce(account), otp, account.getUserName());
 
-        String nonce = issueNonce(account);
         var emailModel = new HashMap<String, Object>(2);
-        emailModel.put("nonce", nonce);
-
-        var setPasswordUrl = String.format("%s/set-password",
-                _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
+        emailModel.put("otp", otp);
         emailModel.put(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, setPasswordUrl);
 
         var emailToSend = new Email(emailModel);
@@ -192,6 +221,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
 
             // pretend the email was sent out successfully to protect against spear phishing attacks
             var recipient = StringUtils.isNotBlank(username) ? username : emailAddress;
+            _otpHelper.storeDecoy(recipient);
             response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, HtmlEscapers.htmlEscaper().escape(recipient), Response.ResponseModelScope.NOT_FAILURE);
         }
         else
@@ -207,10 +237,10 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         try
         {
             var tokenValue = new HashMap<String, Object>(1);
-            tokenValue.put("accountId", account.getUserName());
+            tokenValue.put(OtpHelper.ACCOUNT_ID_ATTRIBUTE, account.getUserName());
 
             var now = Instant.now();
-            var expires = now.plus(Duration.ofSeconds(1200));
+            var expires = now.plus(_otpTimeToLive);
             var tokenAttributes = new TokenAttributes(expires, now, Attributes.fromMap(tokenValue));
             return _nonceTokenIssuer.issue(tokenAttributes);
         }
