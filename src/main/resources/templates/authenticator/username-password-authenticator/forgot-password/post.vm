@@ -55,6 +55,10 @@
     </div>
 
 
+    <div class="center mt3">
+        <a class="button button-primary button-fullwidth" href="$_setPasswordUrl">#message("authenticator.username-password-authenticator.forgot-password.view.success.enter-code")</a>
+    </div>
+
     <div class="center py2 login-actions">
         <a href="$_authUrl">
             <i class="icon ion-android-arrow-back inlineicon"></i>#message("authenticator.username-password-authenticator.forgot-password.view.success.return-to-login")

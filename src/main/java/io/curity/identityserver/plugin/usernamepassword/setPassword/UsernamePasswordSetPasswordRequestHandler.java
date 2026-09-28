@@ -18,19 +18,17 @@ package io.curity.identityserver.plugin.usernamepassword.setPassword;
 
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
-import org.apache.commons.lang3.StringUtils;
+import io.curity.identityserver.plugin.usernamepassword.utils.OtpHelper;
+import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
-import se.curity.identityserver.sdk.attribute.Attribute;
 import se.curity.identityserver.sdk.attribute.SubjectAttributes;
 import se.curity.identityserver.sdk.authentication.AnonymousRequestHandler;
-import se.curity.identityserver.sdk.data.tokens.TokenAttributes;
 import se.curity.identityserver.sdk.errors.ExternalServiceException;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
-import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.credential.CredentialUpdateResult;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
@@ -38,7 +36,9 @@ import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
-import java.util.Optional;
+
+import java.time.Duration;
+import java.time.Instant;
 
 import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
@@ -47,17 +47,23 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
 {
     private static final Logger _logger = LoggerFactory.getLogger(UsernamePasswordSetPasswordRequestHandler.class);
 
-    private final NonceTokenIssuer _nonceTokenIssuer;
     private final SessionManager _sessionManager;
+    private final OtpHelper _otpHelper;
     private final AccountManager _accountManager;
     private final UserCredentialManager _userCredentialManager;
+    private final Duration _setPasswordTimeToLive;
+    private final String _setPasswordUrl;
 
     public UsernamePasswordSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
-        _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _sessionManager = configuration.getSessionManager();
+        _otpHelper = new OtpHelper(configuration);
         _accountManager = configuration.getAccountManager();
         _userCredentialManager = configuration.getCredentialManager();
+        // once the OTP is verified, the user has as long as the OTP was valid for to set the new password
+        _setPasswordTimeToLive = Duration.ofSeconds(configuration.getOtpTimeToLive());
+        _setPasswordUrl = configuration.getAuthenticatorInformationProvider().getFullyQualifiedAnonymousUri()
+                + "/set-password";
     }
 
     @Override
@@ -80,20 +86,14 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
                     HttpStatus.BAD_REQUEST);
         }
 
-        return new RequestModel(request, response);
+        putStepViewData(response);
+
+        return new RequestModel(request);
     }
 
     @Override
     public Void get(RequestModel requestModel, Response response)
     {
-        var model = requestModel.getGetRequestModel();
-
-        String token = model.getToken();
-        if (validateToken(token))
-        {
-            response.putViewData(RequestModel.NONCE_IS_INVALID, false, Response.ResponseModelScope.ANY);
-        }
-
         return null;
     }
 
@@ -101,6 +101,12 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     public Void post(RequestModel requestModel, Response response)
     {
         var model = requestModel.getPostRequestModel();
+
+        if (model.isOtpSubmission())
+        {
+            verifyOtp(model.getOtp(), model.getClientIpAddress(), response);
+            return null;
+        }
 
         UpdatePasswordResult result;
         try
@@ -130,44 +136,45 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         return null;
     }
 
-    private boolean validateToken(String token) {
-
-        // This prevents an error if the page is refreshed after the nonce has been introspected
-        var sessionData = new SetPasswordSessionData(_sessionManager);
-        if (sessionData.hasToken(token))
+    private void verifyOtp(String otp, String clientIpAddress, Response response)
+    {
+        OtpHelper.VerificationResult result = _otpHelper.verify(otp, clientIpAddress);
+        if (result instanceof OtpHelper.VerificationResult.Verified verified)
         {
-            _logger.trace("Nonce was found in the session");
-            return true;
+            _logger.trace("OTP was accepted and the account ID saved to the session");
+            new SetPasswordSessionData(_sessionManager).write(verified.accountId(),
+                    Instant.now().plus(_setPasswordTimeToLive));
+
+            // the OTP was accepted, so show the form to enter the new password
+            response.setResponseModel(templateResponseModel(emptyMap(), "set-password/get"),
+                    Response.ResponseModelScope.NOT_FAILURE);
         }
-
-        Optional<TokenAttributes> introspectionResult = _nonceTokenIssuer.introspect(token);
-        if (introspectionResult.isPresent())
+        else if (result instanceof OtpHelper.VerificationResult.Throttled)
         {
-            _logger.trace("Nonce was successfully introspected");
-            TokenAttributes attributes = introspectionResult.get();
-            Attribute accountId = attributes.get("accountId");
-            String accountIdValue = accountId.getValueOfType(String.class);
-
-            if (StringUtils.isNotBlank(accountIdValue)) {
-
-                // Save to the session so that there is no error if the page is refreshed
-                sessionData.write(token, accountIdValue);
-                _logger.trace("Nonce was accepted and saved to the session");
-                return true;
-
-            }
-            else
-            {
-                _logger.info("Nonce exists but has no accountId claim. " +
-                        "The nonce cannot be used to reset the user password.");
-            }
+            response.addErrorMessage(ErrorMessage.withMessage("validation.error.otp.throttled"));
         }
         else
         {
-            _logger.debug("Nonce was not found");
+            _logger.debug("OTP was not accepted");
+            response.addErrorMessage(ErrorMessage.invalidParameter(RequestModel.Post.OTP_PARAM, "validation.error.otp.invalid"));
         }
 
-        return false;
+        putStepViewData(response);
+    }
+
+    /**
+     * Tell the view whether the OTP or the new password must be entered, or whether the flow cannot continue.
+     */
+    private void putStepViewData(Response response)
+    {
+        boolean otpVerified = new SetPasswordSessionData(_sessionManager).readAccountId() != null;
+        boolean otpRequired = !otpVerified && _otpHelper.hasPendingOtp();
+
+        response.putViewData(RequestModel.OTP_REQUIRED, otpRequired, Response.ResponseModelScope.ANY);
+        response.putViewData(RequestModel.NONCE_IS_INVALID, !otpVerified && !otpRequired,
+                Response.ResponseModelScope.ANY);
+        response.putViewData(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, _setPasswordUrl,
+                Response.ResponseModelScope.ANY);
     }
 
     private UpdatePasswordResult updatePassword(String password)
@@ -176,7 +183,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         String accountId = sessionData.readAccountId();
         if (accountId == null)
         {
-            _logger.trace("No valid nonce was found in the session");
+            _logger.trace("No verified OTP was found in the session");
             return new UpdatePasswordResult.InvalidToken();
         }
 

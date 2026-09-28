@@ -1,4 +1,5 @@
 email.subject=Redefinir sua senha
 email.title=Esqueci minha senha
-email.head1=Clique no botão abaixo para redefinir sua senha
-email.button=Redefinir senha
+email.head1=Use o código a seguir para redefinir sua senha
+email.button=Digitar código
+email.p1=Digite o código no mesmo navegador em que você solicitou a redefinição de senha. O código é válido apenas por um curto período de tempo.

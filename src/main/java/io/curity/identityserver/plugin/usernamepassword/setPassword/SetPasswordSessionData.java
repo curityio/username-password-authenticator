@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import se.curity.identityserver.sdk.attribute.Attribute;
 import se.curity.identityserver.sdk.service.SessionManager;
 
+import java.time.Instant;
+
 public final class SetPasswordSessionData
 {
     private final SessionManager _sessionManager;
@@ -32,25 +34,15 @@ public final class SetPasswordSessionData
         _data = null;
     }
 
-    public void write(String token, String accountId)
+    /**
+     * @param accountId the account whose password may be set
+     * @param expiresAt when the password may no longer be set
+     */
+    public void write(String accountId, Instant expiresAt)
     {
-        Data data = new Data(token, accountId);
+        Data data = new Data(accountId, expiresAt.getEpochSecond());
         String jsonData = new Gson().toJson(data);
         _sessionManager.put(Attribute.of("nonceData", jsonData));
-    }
-
-    public boolean hasToken(String token)
-    {
-        Attribute nonceData = _sessionManager.get("nonceData");
-        if (nonceData != null) {
-
-            _data = new Gson().fromJson(nonceData.getValue().toString(), Data.class);
-            if (_data != null && StringUtils.isNotBlank(_data.token) && _data.token.equals(token)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public String readAccountId()
@@ -59,7 +51,8 @@ public final class SetPasswordSessionData
         if (nonceData != null) {
 
             _data = new Gson().fromJson(nonceData.getValue().toString(), Data.class);
-            if (_data != null && StringUtils.isNotBlank(_data.accountId)) {
+            if (_data != null && StringUtils.isNotBlank(_data.accountId)
+                    && Instant.now().getEpochSecond() < _data.expiresAt) {
                 return _data.accountId;
             }
         }
@@ -74,13 +67,13 @@ public final class SetPasswordSessionData
 
     private static class Data
     {
-        public Data(String tokenInput, String accountIdInput)
+        public Data(String accountIdInput, long expiresAtInput)
         {
-            token = tokenInput;
             accountId = accountIdInput;
+            expiresAt = expiresAtInput;
         }
 
-        public String token;
         public String accountId;
+        public long expiresAt;
     }
 }

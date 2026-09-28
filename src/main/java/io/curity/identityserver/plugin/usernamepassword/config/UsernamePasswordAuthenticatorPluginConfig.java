@@ -17,12 +17,16 @@
 package io.curity.identityserver.plugin.usernamepassword.config;
 
 import se.curity.identityserver.sdk.config.Configuration;
+import se.curity.identityserver.sdk.config.annotation.DefaultLong;
+import se.curity.identityserver.sdk.config.annotation.DefaultService;
 import se.curity.identityserver.sdk.config.annotation.Description;
+import se.curity.identityserver.sdk.config.annotation.RangeConstraint;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.EmailSender;
 import se.curity.identityserver.sdk.service.ExceptionFactory;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
+import se.curity.identityserver.sdk.service.Throttler;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.service.credential.UserCredentialManager;
@@ -53,4 +57,14 @@ public interface UsernamePasswordAuthenticatorPluginConfig extends Configuration
     SessionManager getSessionManager();
 
     ExceptionFactory getExceptionFactory();
+
+    @DefaultService
+    @Description("The throttler used to limit sending and verifying the 'forgot password' OTP. " +
+            "The default throttler is used if none is configured")
+    Throttler getThrottler();
+
+    @DefaultLong(1200)
+    @RangeConstraint(min = 60, max = 86400)
+    @Description("The time, in seconds, the 'forgot password' OTP is valid for")
+    long getOtpTimeToLive();
 }

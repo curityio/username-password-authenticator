@@ -19,33 +19,31 @@ package io.curity.identityserver.plugin.usernamepassword.forgotPassword;
 import com.google.common.html.HtmlEscapers;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.descriptor.UsernamePasswordAuthenticatorPluginDescriptor;
+import io.curity.identityserver.plugin.usernamepassword.setPassword.SetPasswordSessionData;
 import io.curity.identityserver.plugin.usernamepassword.utils.NullEmailSender;
+import io.curity.identityserver.plugin.usernamepassword.utils.OtpHelper;
 import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
-import se.curity.identityserver.sdk.attribute.Attributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.data.email.Email;
-import se.curity.identityserver.sdk.data.tokens.TokenAttributes;
 import se.curity.identityserver.sdk.data.tokens.TokenIssuerException;
 import se.curity.identityserver.sdk.errors.ErrorCode;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.EmailSender;
 import se.curity.identityserver.sdk.service.ExceptionFactory;
-import se.curity.identityserver.sdk.service.NonceTokenIssuer;
+import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
 import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
@@ -71,17 +69,19 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     private final UserPreferenceManager _userPreferenceManager;
     private final AccountManager _accountManager;
     private final EmailSender _emailSender;
-    private final NonceTokenIssuer _nonceTokenIssuer;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final ExceptionFactory _exceptionFactory;
+    private final SessionManager _sessionManager;
+    private final OtpHelper _otpHelper;
 
     public UsernamePasswordForgotPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
-        _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
         _exceptionFactory = configuration.getExceptionFactory();
+        _sessionManager = configuration.getSessionManager();
+        _otpHelper = new OtpHelper(configuration);
 
         if (configuration.getEmailSender().isPresent())
         {
@@ -105,16 +105,20 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
             response.setResponseModel(templateResponseModel(data, "forgot-password/post"),
                     Response.ResponseModelScope.NOT_FAILURE);
 
+            // on failure (e.g. when throttled), go back to the form, keeping the (escaped) values entered
             var postModel = new RequestModel.PostRequestModel(request);
-            data.put(ViewModelReservedKeys.USERNAME, postModel.getUsername());
+            var errorData = new HashMap<String, Object>(data);
+            errorData.put(ViewModelReservedKeys.FORM_POST_BACK, postModel.dataOnError());
 
-            response.setResponseModel(templateResponseModel(data, "forgot-password/get"),
+            response.setResponseModel(templateResponseModel(errorData, "forgot-password/get"),
                     HttpStatus.BAD_REQUEST);
         }
         else if (request.isGetRequest())
         {
             var getModel = new RequestModel.GetRequestModel(_userPreferenceManager);
-            data.put(ViewModelReservedKeys.USERNAME, getModel.getUsername());
+            @Nullable String username = getModel.getUsername();
+            data.put(ViewModelReservedKeys.USERNAME,
+                    username == null ? null : HtmlEscapers.htmlEscaper().escape(username));
 
             response.setResponseModel(templateResponseModel(data, "forgot-password/get"),
                     Response.ResponseModelScope.NOT_FAILURE);
@@ -149,10 +153,29 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         }
 
         @Nullable String emailValue = AccountAttributes.emailFrom(account);
+        boolean accountFound = account != null && emailValue != null;
 
-        if (account != null && emailValue != null)
+        // throttle on the entered value, never on the account, so that throttling cannot reveal whether it exists
+        @Nullable String throttlingKey = StringUtils.isNotBlank(username) ? username : emailAddress;
+
+        if (StringUtils.isNotBlank(throttlingKey) && _otpHelper.isSendingThrottled(throttlingKey))
         {
-            onAccountFound(response, emailValue, account);
+            // keep any OTP already sent valid, and do not send a new one
+            response.addErrorMessage(ErrorMessage.withMessage("error.throttled"));
+            return Optional.empty();
+        }
+
+        // a new request replaces any password reset already in progress in this session
+        new SetPasswordSessionData(_sessionManager).remove();
+
+        var setPasswordUrl = String.format("%s/set-password",
+                _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
+        response.putViewData(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, setPasswordUrl,
+                Response.ResponseModelScope.NOT_FAILURE);
+
+        if (accountFound)
+        {
+            onAccountFound(response, emailValue, account, throttlingKey, setPasswordUrl);
         }
         else
         {
@@ -162,14 +185,13 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         return Optional.empty();
     }
 
-    private void onAccountFound(Response response, String emailValue, AccountAttributes account) {
+    private void onAccountFound(Response response, String emailValue, AccountAttributes account,
+                                String throttlingKey, String setPasswordUrl)
+    {
+        String otp = issueOtp(account, throttlingKey);
 
-        String nonce = issueNonce(account);
         var emailModel = new HashMap<String, Object>(2);
-        emailModel.put("nonce", nonce);
-
-        var setPasswordUrl = String.format("%s/set-password",
-                _authenticatorInformationProvider.getFullyQualifiedAnonymousUri());
+        emailModel.put("otp", otp);
         emailModel.put(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, setPasswordUrl);
 
         var emailToSend = new Email(emailModel);
@@ -192,6 +214,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
 
             // pretend the email was sent out successfully to protect against spear phishing attacks
             var recipient = StringUtils.isNotBlank(username) ? username : emailAddress;
+            _otpHelper.storeDecoy(recipient);
             response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, HtmlEscapers.htmlEscaper().escape(recipient), Response.ResponseModelScope.NOT_FAILURE);
         }
         else
@@ -202,17 +225,11 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         }
     }
 
-    private String issueNonce(AccountAttributes account) {
-
+    private String issueOtp(AccountAttributes account, String throttlingKey)
+    {
         try
         {
-            var tokenValue = new HashMap<String, Object>(1);
-            tokenValue.put("accountId", account.getUserName());
-
-            var now = Instant.now();
-            var expires = now.plus(Duration.ofSeconds(1200));
-            var tokenAttributes = new TokenAttributes(expires, now, Attributes.fromMap(tokenValue));
-            return _nonceTokenIssuer.issue(tokenAttributes);
+            return _otpHelper.issue(account.getUserName(), throttlingKey);
         }
         catch (TokenIssuerException ignored)
         {

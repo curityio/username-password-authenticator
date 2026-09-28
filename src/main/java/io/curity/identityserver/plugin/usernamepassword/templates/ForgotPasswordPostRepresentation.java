@@ -21,11 +21,13 @@ import se.curity.identityserver.sdk.haapi.Message;
 import se.curity.identityserver.sdk.haapi.RepresentationFactory;
 import se.curity.identityserver.sdk.haapi.RepresentationFunction;
 import se.curity.identityserver.sdk.haapi.RepresentationModel;
+import se.curity.identityserver.sdk.http.HttpMethod;
 import se.curity.identityserver.sdk.web.Representation;
 
 import java.net.URI;
 
 import static io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION;
+import static io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys.SET_PASSWORD_ENDPOINT;
 
 public class ForgotPasswordPostRepresentation implements RepresentationFunction
 {
@@ -33,6 +35,7 @@ public class ForgotPasswordPostRepresentation implements RepresentationFunction
     private static final Message MSG_NO_EMAIL = Message.ofKey("view.success.no-email");
     private static final Message MSG_CHECK_SPAM_FOLDER = Message.ofKey("view.success.check-your-spam-folder");
     private static final Message MSG_CONTINUE = Message.ofKey("view.success.return-to-login");
+    private static final Message MSG_ENTER_CODE = Message.ofKey("view.success.enter-code");
 
     @Override
     public Representation apply(RepresentationModel model, RepresentationFactory factory)
@@ -44,6 +47,12 @@ public class ForgotPasswordPostRepresentation implements RepresentationFunction
             builder.addMessage(MSG_NO_EMAIL);
             builder.addMessage(MSG_CHECK_SPAM_FOLDER);
 
+            String setPasswordUrl = model.getOptionalString("_anonymousUrl")
+                    .map(anonymousUrl -> anonymousUrl + "/set-password")
+                    .orElseGet(() -> model.getString(SET_PASSWORD_ENDPOINT));
+            builder.addFormAction(HaapiContract.Actions.Kinds.CONTINUE, URI.create(setPasswordUrl),
+                    HttpMethod.GET, null, null, MSG_ENTER_CODE);
+
             builder.addLink(URI.create(model.getString("_authUrl")), HaapiContract.Links.Relations.RESTART, MSG_CONTINUE);
         });
     }
@@ -51,17 +60,23 @@ public class ForgotPasswordPostRepresentation implements RepresentationFunction
     private static String mask(String recipientOfCommunication)
     {
         int atIndex = recipientOfCommunication.indexOf("@");
+        if (atIndex < 0)
+        {
+            // not an email address, e.g. the username entered for an unknown account
+            return maskPart(recipientOfCommunication);
+        }
         String prefix = recipientOfCommunication.substring(0, atIndex);
         String domain = recipientOfCommunication.substring(atIndex + 1);
 
-        // Masking one-third of the prefix
-        int prefixOneThirdLength = Math.max(1, prefix.length() / 3);
-        String maskedPrefix = prefix.substring(0, prefixOneThirdLength) + "****";
+        return maskPart(prefix) + "@" + maskPart(domain);
+    }
 
-        // Masking one-third of the domain
-        int domainOneThirdLength = Math.max(1, domain.length() / 3);
-        String maskedDomain = domain.substring(0, domainOneThirdLength) + "****";
-
-        return maskedPrefix + "@" + maskedDomain;
+    /**
+     * Keep only the first third of the value.
+     */
+    private static String maskPart(String value)
+    {
+        int oneThirdLength = Math.min(value.length(), Math.max(1, value.length() / 3));
+        return value.substring(0, oneThirdLength) + "****";
     }
 }
