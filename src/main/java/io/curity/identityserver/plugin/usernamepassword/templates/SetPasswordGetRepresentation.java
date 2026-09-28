@@ -28,6 +28,7 @@ import java.net.URI;
 
 import static io.curity.identityserver.plugin.usernamepassword.setPassword.RequestModel.NONCE_IS_INVALID;
 import static io.curity.identityserver.plugin.usernamepassword.setPassword.RequestModel.OTP_REQUIRED;
+import static io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys.SET_PASSWORD_ENDPOINT;
 
 /**
  * The set password page asks for the OTP sent by email, then for the new password.
@@ -58,7 +59,9 @@ public final class SetPasswordGetRepresentation implements RepresentationFunctio
             });
         }
 
-        URI setPasswordUrl = URI.create(model.getString("_anonymousUrl") + "/set-password");
+        URI setPasswordUrl = URI.create(model.getOptionalString("_anonymousUrl")
+                .map(anonymousUrl -> anonymousUrl + "/set-password")
+                .orElseGet(() -> model.getString(SET_PASSWORD_ENDPOINT)));
         boolean otpRequired = model.getBoolean(OTP_REQUIRED, false);
 
         return factory.newAuthenticationStep(step -> {

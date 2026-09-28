@@ -19,6 +19,7 @@ package io.curity.identityserver.plugin.usernamepassword.setPassword;
 import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import io.curity.identityserver.plugin.usernamepassword.utils.CredentialOperations;
 import io.curity.identityserver.plugin.usernamepassword.utils.OtpHelper;
+import io.curity.identityserver.plugin.usernamepassword.utils.ViewModelReservedKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
@@ -36,6 +37,9 @@ import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
 
+import java.time.Duration;
+import java.time.Instant;
+
 import static java.util.Collections.emptyMap;
 import static se.curity.identityserver.sdk.web.ResponseModel.templateResponseModel;
 
@@ -47,14 +51,19 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
     private final OtpHelper _otpHelper;
     private final AccountManager _accountManager;
     private final UserCredentialManager _userCredentialManager;
+    private final Duration _setPasswordTimeToLive;
+    private final String _setPasswordUrl;
 
     public UsernamePasswordSetPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _sessionManager = configuration.getSessionManager();
-        _otpHelper = new OtpHelper(_sessionManager, configuration.getNonceTokenIssuer(),
-                configuration.getThrottler());
+        _otpHelper = new OtpHelper(configuration);
         _accountManager = configuration.getAccountManager();
         _userCredentialManager = configuration.getCredentialManager();
+        // once the OTP is verified, the user has as long as the OTP was valid for to set the new password
+        _setPasswordTimeToLive = Duration.ofSeconds(configuration.getOtpTimeToLive());
+        _setPasswordUrl = configuration.getAuthenticatorInformationProvider().getFullyQualifiedAnonymousUri()
+                + "/set-password";
     }
 
     @Override
@@ -133,7 +142,8 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         if (result instanceof OtpHelper.VerificationResult.Verified verified)
         {
             _logger.trace("OTP was accepted and the account ID saved to the session");
-            new SetPasswordSessionData(_sessionManager).write(verified.accountId());
+            new SetPasswordSessionData(_sessionManager).write(verified.accountId(),
+                    Instant.now().plus(_setPasswordTimeToLive));
 
             // the OTP was accepted, so show the form to enter the new password
             response.setResponseModel(templateResponseModel(emptyMap(), "set-password/get"),
@@ -162,6 +172,8 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
 
         response.putViewData(RequestModel.OTP_REQUIRED, otpRequired, Response.ResponseModelScope.ANY);
         response.putViewData(RequestModel.NONCE_IS_INVALID, !otpVerified && !otpRequired,
+                Response.ResponseModelScope.ANY);
+        response.putViewData(ViewModelReservedKeys.SET_PASSWORD_ENDPOINT, _setPasswordUrl,
                 Response.ResponseModelScope.ANY);
     }
 

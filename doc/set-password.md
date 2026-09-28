@@ -17,7 +17,7 @@ https://idsvr.example.com/authn/anonymous/usernamepassword/set-password
 
 The page first asks for the OTP. Once it is accepted, the page asks for the new password.\
 The OTP is valid for the configured `OTP Time To Live` (20 minutes by default) and allows 5 attempts, after which a new one must be requested.\
-Attempts are also throttled per account by the configured Throttler service (the default throttler unless one is configured).\
+Attempts are also throttled per account (ignoring case) by the configured Throttler service (the default throttler unless one is configured).\
 When throttled, the user is asked to try again later, even if the OTP is correct.
 
 ## Expired Codes
@@ -34,7 +34,7 @@ A Credential Policy is optional but if configured these rules will be enforced:
 
 ## Set Password Screen
 
-If the OTP is valid then the set password screen is shown. The page is invoked via a URL with this format: `/authn/authentication/set-password`.\
+If the OTP is valid then the set password screen is shown. The page is invoked via a URL with this format: `/authn/anonymous/<authenticator-id>/set-password`.\
 The user then enters a new password which may need to meet a credential policy.\
 If this fails a screen of the following form is shown and the user can retry:
 
@@ -57,9 +57,12 @@ Since the same browser is used for forgot and set password, the application logi
 
 ## Technical Behavior
 
-When the OTP is submitted, its hash is compared with the one stored in session data.\
-Only when it matches is the nonce looked up in the data source, via an introspection request which also removes it.\
-The account ID is then saved to session data, which is backed by a browser cookie.\
+When the OTP is submitted, the nonce is first looked up in the data source, via an introspection request which also removes it.\
+This ensures that concurrent attempts cannot check more than one OTP per nonce.\
+The OTP is then compared with the salted hash stored in session data.\
+If it is wrong, a new nonce with the same expiration time replaces the old one, until no attempts are left.\
+If it is correct, the account ID is saved to session data, which is stored on the server and referenced by the session cookie.\
+The user then has as long as the OTP was valid for to set the new password.\
 This ensures that if a user accidentally closes the password reset page they can retry without errors.
 
 ## Code Behavior

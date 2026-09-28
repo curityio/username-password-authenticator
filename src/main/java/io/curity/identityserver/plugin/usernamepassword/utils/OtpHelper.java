@@ -17,11 +17,14 @@
 package io.curity.identityserver.plugin.usernamepassword.utils;
 
 import com.google.gson.Gson;
+import io.curity.identityserver.plugin.usernamepassword.config.UsernamePasswordAuthenticatorPluginConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.Attribute;
+import se.curity.identityserver.sdk.attribute.Attributes;
 import se.curity.identityserver.sdk.data.tokens.TokenAttributes;
+import se.curity.identityserver.sdk.data.tokens.TokenIssuerException;
 import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.Throttler;
@@ -30,49 +33,49 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HexFormat;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Binds a one-time password (OTP) to a nonce and to the current session.
  * <p>
- * The nonce carries the account ID and the expiration time, while the session holds a hash of the OTP.
- * The nonce is only introspected (and so consumed) once the user has entered the correct OTP, or when too many
- * wrong attempts have been made.
+ * The nonce carries the account ID, while the session holds a salted hash of the OTP and its expiration time.
+ * Every verification attempt consumes the nonce before the OTP is checked, so that concurrent attempts cannot
+ * check more than one OTP per nonce. After a wrong OTP, a new nonce with the same expiration time replaces it,
+ * until the maximum number of attempts is reached.
  * <p>
  * Every verification attempt is also checked by a {@link Throttler}, keyed by the account the OTP was issued for,
  * so that OTPs cannot be brute-forced across sessions. Sending OTPs is throttled with a separate purpose.
  */
 public final class OtpHelper
 {
-    public static final String ACCOUNT_ID_ATTRIBUTE = "accountId";
-
     private static final Logger _logger = LoggerFactory.getLogger(OtpHelper.class);
+    private static final String ACCOUNT_ID_ATTRIBUTE = "accountId";
     private static final String SESSION_KEY = "otpData";
     private static final String THROTTLING_PURPOSE = "forgot-password-otp";
     private static final String SENDING_THROTTLING_PURPOSE = "forgot-password-email";
     private static final int OTP_LENGTH = 6;
+    private static final int SALT_LENGTH = 16;
     private static final int MAX_ATTEMPTS = 5;
     private static final SecureRandom _random = new SecureRandom();
 
     private final SessionManager _sessionManager;
     private final NonceTokenIssuer _nonceTokenIssuer;
     private final Throttler _throttler;
+    private final Duration _timeToLive;
+    private final String _authenticatorId;
 
-    public OtpHelper(SessionManager sessionManager, NonceTokenIssuer nonceTokenIssuer, Throttler throttler)
+    public OtpHelper(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
-        _sessionManager = sessionManager;
-        _nonceTokenIssuer = nonceTokenIssuer;
-        _throttler = throttler;
-    }
-
-    public static String generateOtp()
-    {
-        var otp = new StringBuilder(OTP_LENGTH);
-        for (int i = 0; i < OTP_LENGTH; i++)
-        {
-            otp.append(_random.nextInt(10));
-        }
-        return otp.toString();
+        _sessionManager = configuration.getSessionManager();
+        _nonceTokenIssuer = configuration.getNonceTokenIssuer();
+        _throttler = configuration.getThrottler();
+        _timeToLive = Duration.ofSeconds(configuration.getOtpTimeToLive());
+        _authenticatorId = configuration.id();
     }
 
     /**
@@ -80,12 +83,12 @@ public final class OtpHelper
      * <p>
      * Calling this method updates the throttling state, so it must be called once per OTP to be sent.
      *
-     * @param throttlingKey the account ID, or the username or email entered by the user if no account was found
+     * @param identifier the account ID, or the username or email entered by the user if no account was found
      * @return true if no OTP should be sent
      */
-    public boolean isSendingThrottled(String throttlingKey)
+    public boolean isSendingThrottled(String identifier)
     {
-        if (_throttler.shouldThrottle(throttlingKey, SENDING_THROTTLING_PURPOSE)
+        if (_throttler.shouldThrottle(throttlingKey(identifier), SENDING_THROTTLING_PURPOSE)
                 instanceof Throttler.ThrottlingResult.Throttled)
         {
             _logger.debug("Sending the OTP was throttled");
@@ -95,43 +98,55 @@ public final class OtpHelper
     }
 
     /**
-     * Store the OTP in the session, invalidating any previous one.
+     * Issue a new OTP for the account and store it in the session, invalidating any previous one.
      *
-     * @param nonce     a nonce containing the {@link #ACCOUNT_ID_ATTRIBUTE}
-     * @param otp       the OTP sent to the user
-     * @param accountId the account the OTP was issued for, used as the throttling key
+     * @param accountId the account the OTP is issued for
+     * @return the OTP to send to the user
+     * @throws TokenIssuerException if the nonce could not be issued
      */
-    public void store(String nonce, String otp, String accountId)
+    public String issue(String accountId) throws TokenIssuerException
     {
         invalidate();
-        write(new Data(nonce, hash(nonce, otp), accountId, 0));
+
+        String otp = generateOtp();
+        String salt = generateSalt();
+        Instant expiresAt = Instant.now().plus(_timeToLive);
+        String nonce = issueNonce(accountId, expiresAt);
+
+        write(new Data(nonce, salt, hash(salt, otp), throttlingKey(accountId), 0, expiresAt.getEpochSecond()));
+        return otp;
     }
 
     /**
      * Store an OTP that can never be verified. Used when no account was found, so that the user sees the same
      * behavior as when an account exists.
      *
-     * @param throttlingKey the username or email entered by the user, so that attempts are throttled as usual
+     * @param identifier the username or email entered by the user, so that attempts are throttled as usual
      */
-    public void storeDecoy(String throttlingKey)
+    public void storeDecoy(String identifier)
     {
         invalidate();
-        write(new Data(null, hash(generateOtp(), generateOtp()), throttlingKey, 0));
+
+        String salt = generateSalt();
+        Instant expiresAt = Instant.now().plus(_timeToLive);
+        write(new Data(null, salt, hash(salt, generateOtp()), throttlingKey(identifier), 0,
+                expiresAt.getEpochSecond()));
     }
 
     public boolean hasPendingOtp()
     {
-        return read() != null;
+        @Nullable Data data = read();
+        return data != null && !data.isExpired();
     }
 
     /**
      * Verify the OTP entered by the user.
      * <p>
-     * If the OTP is correct, the nonce is consumed and the OTP is removed from the session.
+     * If the OTP is correct, the OTP is removed from the session.
      * If it is wrong, the user may retry until the maximum number of attempts is reached.
      *
      * @param otp the OTP entered by the user
-     * @return the verification result, holding the account ID if the OTP is correct and the nonce has not expired
+     * @return the verification result, holding the account ID if the OTP is correct and has not expired
      */
     public VerificationResult verify(String otp)
     {
@@ -142,6 +157,13 @@ public final class OtpHelper
             return new VerificationResult.Invalid();
         }
 
+        if (data.isExpired())
+        {
+            _logger.debug("The OTP has expired");
+            invalidate();
+            return new VerificationResult.Invalid();
+        }
+
         if (_throttler.shouldThrottle(data.throttlingKey, THROTTLING_PURPOSE)
                 instanceof Throttler.ThrottlingResult.Throttled)
         {
@@ -149,31 +171,34 @@ public final class OtpHelper
             return new VerificationResult.Throttled();
         }
 
-        if (data.nonce == null || !MessageDigest.isEqual(
-                data.otpHash.getBytes(StandardCharsets.US_ASCII),
-                hash(data.nonce, otp.trim()).getBytes(StandardCharsets.US_ASCII)))
+        if (data.nonce == null)
         {
-            int attempts = data.attempts + 1;
-            if (attempts >= MAX_ATTEMPTS)
-            {
-                _logger.debug("Maximum number of OTP attempts reached");
-                invalidate();
-            }
-            else
-            {
-                write(new Data(data.nonce, data.otpHash, data.throttlingKey, attempts));
-            }
+            // a decoy OTP never verifies
+            recordFailedAttempt(data, null);
+            return new VerificationResult.Invalid();
+        }
+
+        // consume the nonce before checking the OTP, so that only one concurrent attempt can check it
+        Optional<String> accountId = _nonceTokenIssuer.introspect(data.nonce).map(this::accountIdFrom);
+        if (accountId.isEmpty())
+        {
+            // another attempt consumed the nonce concurrently; leave the session as that attempt leaves it
+            _logger.debug("The OTP nonce was already consumed");
+            return new VerificationResult.Invalid();
+        }
+
+        if (!MessageDigest.isEqual(
+                data.otpHash.getBytes(StandardCharsets.US_ASCII),
+                hash(data.salt, otp.trim()).getBytes(StandardCharsets.US_ASCII)))
+        {
+            recordFailedAttempt(data, accountId.get());
             return new VerificationResult.Invalid();
         }
 
         _sessionManager.remove(SESSION_KEY);
         _throttler.clear(data.throttlingKey, THROTTLING_PURPOSE);
 
-        @Nullable String accountId = _nonceTokenIssuer.introspect(data.nonce)
-                .map(this::accountIdFrom)
-                .orElse(null);
-
-        return accountId == null ? new VerificationResult.Invalid() : new VerificationResult.Verified(accountId);
+        return new VerificationResult.Verified(accountId.get());
     }
 
     /**
@@ -189,6 +214,43 @@ public final class OtpHelper
         }
     }
 
+    /**
+     * Count a wrong OTP. The nonce was already consumed, so a new one is issued unless no attempts are left.
+     */
+    private void recordFailedAttempt(Data data, @Nullable String accountId)
+    {
+        int attempts = data.attempts + 1;
+        if (attempts >= MAX_ATTEMPTS)
+        {
+            _logger.debug("Maximum number of OTP attempts reached");
+            _sessionManager.remove(SESSION_KEY);
+            return;
+        }
+
+        @Nullable String nonce = null;
+        if (accountId != null)
+        {
+            try
+            {
+                nonce = issueNonce(accountId, Instant.ofEpochSecond(data.expiresAt));
+            }
+            catch (TokenIssuerException e)
+            {
+                _logger.warn("Could not issue a new nonce after a wrong OTP; the user must request a new OTP");
+                _sessionManager.remove(SESSION_KEY);
+                return;
+            }
+        }
+
+        write(new Data(nonce, data.salt, data.otpHash, data.throttlingKey, attempts, data.expiresAt));
+    }
+
+    private String issueNonce(String accountId, Instant expiresAt) throws TokenIssuerException
+    {
+        var attributes = Attributes.fromMap(Map.of(ACCOUNT_ID_ATTRIBUTE, accountId));
+        return _nonceTokenIssuer.issue(new TokenAttributes(expiresAt, Instant.now(), attributes));
+    }
+
     @Nullable
     private String accountIdFrom(TokenAttributes attributes)
     {
@@ -196,9 +258,35 @@ public final class OtpHelper
         return accountId == null ? null : accountId.getValueOfType(String.class);
     }
 
-    private String hash(String nonce, String otp)
+    /**
+     * Throttle per authenticator, and regardless of case or surrounding spaces, so that variants of the same
+     * identifier share the same state.
+     */
+    private String throttlingKey(String identifier)
     {
-        var value = String.join(":", nonce, otp, _sessionManager.getSessionId());
+        return _authenticatorId + ":" + identifier.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static String generateOtp()
+    {
+        var otp = new StringBuilder(OTP_LENGTH);
+        for (int i = 0; i < OTP_LENGTH; i++)
+        {
+            otp.append(_random.nextInt(10));
+        }
+        return otp.toString();
+    }
+
+    private static String generateSalt()
+    {
+        var salt = new byte[SALT_LENGTH];
+        _random.nextBytes(salt);
+        return HexFormat.of().formatHex(salt);
+    }
+
+    private String hash(String salt, String otp)
+    {
+        var value = String.join(":", salt, otp, _sessionManager.getSessionId());
         try
         {
             var digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
@@ -222,8 +310,13 @@ public final class OtpHelper
         _sessionManager.put(Attribute.of(SESSION_KEY, new Gson().toJson(data)));
     }
 
-    private record Data(@Nullable String nonce, String otpHash, String throttlingKey, int attempts)
+    private record Data(@Nullable String nonce, String salt, String otpHash, String throttlingKey, int attempts,
+                        long expiresAt)
     {
+        boolean isExpired()
+        {
+            return Instant.now().getEpochSecond() >= expiresAt;
+        }
     }
 
     public sealed interface VerificationResult

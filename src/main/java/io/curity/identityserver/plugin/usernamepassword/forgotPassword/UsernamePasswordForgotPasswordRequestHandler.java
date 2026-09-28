@@ -28,18 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import se.curity.identityserver.sdk.Nullable;
 import se.curity.identityserver.sdk.attribute.AccountAttributes;
-import se.curity.identityserver.sdk.attribute.Attributes;
 import se.curity.identityserver.sdk.authentication.AuthenticationResult;
 import se.curity.identityserver.sdk.authentication.AuthenticatorRequestHandler;
 import se.curity.identityserver.sdk.data.email.Email;
-import se.curity.identityserver.sdk.data.tokens.TokenAttributes;
 import se.curity.identityserver.sdk.data.tokens.TokenIssuerException;
 import se.curity.identityserver.sdk.errors.ErrorCode;
 import se.curity.identityserver.sdk.http.HttpStatus;
 import se.curity.identityserver.sdk.service.AccountManager;
 import se.curity.identityserver.sdk.service.EmailSender;
 import se.curity.identityserver.sdk.service.ExceptionFactory;
-import se.curity.identityserver.sdk.service.NonceTokenIssuer;
 import se.curity.identityserver.sdk.service.SessionManager;
 import se.curity.identityserver.sdk.service.UserPreferenceManager;
 import se.curity.identityserver.sdk.service.authentication.AuthenticatorInformationProvider;
@@ -47,8 +44,6 @@ import se.curity.identityserver.sdk.web.Request;
 import se.curity.identityserver.sdk.web.Response;
 import se.curity.identityserver.sdk.web.alerts.ErrorMessage;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Set;
@@ -74,23 +69,19 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     private final UserPreferenceManager _userPreferenceManager;
     private final AccountManager _accountManager;
     private final EmailSender _emailSender;
-    private final NonceTokenIssuer _nonceTokenIssuer;
     private final AuthenticatorInformationProvider _authenticatorInformationProvider;
     private final ExceptionFactory _exceptionFactory;
     private final SessionManager _sessionManager;
     private final OtpHelper _otpHelper;
-    private final Duration _otpTimeToLive;
 
     public UsernamePasswordForgotPasswordRequestHandler(UsernamePasswordAuthenticatorPluginConfig configuration)
     {
         _accountManager = configuration.getAccountManager();
         _userPreferenceManager = configuration.getUserPreferenceManager();
-        _nonceTokenIssuer = configuration.getNonceTokenIssuer();
         _authenticatorInformationProvider = configuration.getAuthenticatorInformationProvider();
         _exceptionFactory = configuration.getExceptionFactory();
         _sessionManager = configuration.getSessionManager();
-        _otpHelper = new OtpHelper(_sessionManager, _nonceTokenIssuer, configuration.getThrottler());
-        _otpTimeToLive = Duration.ofSeconds(configuration.getOtpTimeToLive());
+        _otpHelper = new OtpHelper(configuration);
 
         if (configuration.getEmailSender().isPresent())
         {
@@ -114,16 +105,20 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
             response.setResponseModel(templateResponseModel(data, "forgot-password/post"),
                     Response.ResponseModelScope.NOT_FAILURE);
 
+            // on failure (e.g. when throttled), go back to the form, keeping the (escaped) values entered
             var postModel = new RequestModel.PostRequestModel(request);
-            data.put(ViewModelReservedKeys.USERNAME, postModel.getUsername());
+            var errorData = new HashMap<String, Object>(data);
+            errorData.put(ViewModelReservedKeys.FORM_POST_BACK, postModel.dataOnError());
 
-            response.setResponseModel(templateResponseModel(data, "forgot-password/get"),
+            response.setResponseModel(templateResponseModel(errorData, "forgot-password/get"),
                     HttpStatus.BAD_REQUEST);
         }
         else if (request.isGetRequest())
         {
             var getModel = new RequestModel.GetRequestModel(_userPreferenceManager);
-            data.put(ViewModelReservedKeys.USERNAME, getModel.getUsername());
+            @Nullable String username = getModel.getUsername();
+            data.put(ViewModelReservedKeys.USERNAME,
+                    username == null ? null : HtmlEscapers.htmlEscaper().escape(username));
 
             response.setResponseModel(templateResponseModel(data, "forgot-password/get"),
                     Response.ResponseModelScope.NOT_FAILURE);
@@ -194,8 +189,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     private void onAccountFound(Response response, String emailValue, AccountAttributes account,
                                 String setPasswordUrl)
     {
-        String otp = OtpHelper.generateOtp();
-        _otpHelper.store(issueNonce(account), otp, account.getUserName());
+        String otp = issueOtp(account);
 
         var emailModel = new HashMap<String, Object>(2);
         emailModel.put("otp", otp);
@@ -232,17 +226,11 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         }
     }
 
-    private String issueNonce(AccountAttributes account) {
-
+    private String issueOtp(AccountAttributes account)
+    {
         try
         {
-            var tokenValue = new HashMap<String, Object>(1);
-            tokenValue.put(OtpHelper.ACCOUNT_ID_ATTRIBUTE, account.getUserName());
-
-            var now = Instant.now();
-            var expires = now.plus(_otpTimeToLive);
-            var tokenAttributes = new TokenAttributes(expires, now, Attributes.fromMap(tokenValue));
-            return _nonceTokenIssuer.issue(tokenAttributes);
+            return _otpHelper.issue(account.getUserName());
         }
         catch (TokenIssuerException ignored)
         {

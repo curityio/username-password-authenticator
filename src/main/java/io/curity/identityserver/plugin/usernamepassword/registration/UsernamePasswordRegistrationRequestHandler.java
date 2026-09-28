@@ -202,6 +202,8 @@ public final class UsernamePasswordRegistrationRequestHandler implements Registr
         {
             case "error.validation.accountId.duplicate" -> ErrorMessage.invalidParameter("userName", error.getMessage());
             case "error.validation.email.duplicate" -> ErrorMessage.invalidParameter("primaryEmail", error.getMessage());
+            case "error.validation.phone.duplicate" ->
+                    ErrorMessage.invalidParameter("primaryPhoneNumber", error.getMessage());
             default -> error;
         };
     }

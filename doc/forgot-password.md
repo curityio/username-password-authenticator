@@ -56,7 +56,7 @@ An email will then be received that provides the OTP and a link to the page wher
 
 The forgot password flow generates a one time token, or `nonce`, which holds the account ID and expires after the configured `OTP Time To Live` (20 minutes by default).\
 It also generates a 6-digit OTP, which is sent in the email.\
-The nonce and a hash of the OTP, bound to the session ID, are saved in session data.\
+The nonce, a salted hash of the OTP bound to the session ID, and the expiration time are saved in session data.\
 The nonce itself is never sent to the user, so the OTP can only be used in the browser that requested it.\
 Any OTP previously issued in the same session is invalidated.\
 If no account is found, a decoy OTP that can never be verified is stored instead, so that the flow behaves the same way.
