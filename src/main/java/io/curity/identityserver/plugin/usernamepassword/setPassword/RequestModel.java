@@ -56,8 +56,11 @@ public class RequestModel
         @Nullable
         private final String _password;
 
+        private final String _clientIpAddress;
+
         public Post(Request request)
         {
+            _clientIpAddress = request.getClientIpAddress();
             _otp = request.getFormParameterValueOrError(OTP_PARAM);
             _password = request.getFormParameterValueOrError(PASSWORD_PARAM);
         }
@@ -77,6 +80,11 @@ public class RequestModel
         public String getPassword()
         {
             return _password;
+        }
+
+        public String getClientIpAddress()
+        {
+            return _clientIpAddress;
         }
 
         @AssertTrue(message = "validation.error.otp.required")

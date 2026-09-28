@@ -48,8 +48,16 @@ import java.util.Optional;
  * check more than one OTP per nonce. After a wrong OTP, a new nonce with the same expiration time replaces it,
  * until the maximum number of attempts is reached.
  * <p>
- * Every verification attempt is also checked by a {@link Throttler}, keyed by the account the OTP was issued for,
- * so that OTPs cannot be brute-forced across sessions. Sending OTPs is throttled with a separate purpose.
+ * Throttling uses the identifier the user entered (username or email), never whether an account exists, so that
+ * throttling cannot reveal which accounts exist:
+ * <ul>
+ *     <li>sending OTPs is throttled per identifier, which also limits how many OTPs can be guessed per identifier,
+ *     regardless of how many client IP addresses are used;</li>
+ *     <li>verification attempts are throttled per client IP address, so that a single client cannot keep guessing
+ *     OTPs for many identifiers;</li>
+ *     <li>verification attempts are also throttled per identifier and client IP address, so that failed attempts
+ *     from one client cannot lock out the same identifier from other clients.</li>
+ * </ul>
  */
 public final class OtpHelper
 {
@@ -57,6 +65,7 @@ public final class OtpHelper
     private static final String ACCOUNT_ID_ATTRIBUTE = "accountId";
     private static final String SESSION_KEY = "otpData";
     private static final String THROTTLING_PURPOSE = "forgot-password-otp";
+    private static final String CLIENT_THROTTLING_PURPOSE = "forgot-password-otp-client";
     private static final String SENDING_THROTTLING_PURPOSE = "forgot-password-email";
     private static final int OTP_LENGTH = 6;
     private static final int SALT_LENGTH = 16;
@@ -83,7 +92,7 @@ public final class OtpHelper
      * <p>
      * Calling this method updates the throttling state, so it must be called once per OTP to be sent.
      *
-     * @param identifier the account ID, or the username or email entered by the user if no account was found
+     * @param identifier the username or email entered by the user
      * @return true if no OTP should be sent
      */
     public boolean isSendingThrottled(String identifier)
@@ -100,11 +109,12 @@ public final class OtpHelper
     /**
      * Issue a new OTP for the account and store it in the session, invalidating any previous one.
      *
-     * @param accountId the account the OTP is issued for
+     * @param accountId  the account the OTP is issued for
+     * @param identifier the username or email entered by the user, used for throttling
      * @return the OTP to send to the user
      * @throws TokenIssuerException if the nonce could not be issued
      */
-    public String issue(String accountId) throws TokenIssuerException
+    public String issue(String accountId, String identifier) throws TokenIssuerException
     {
         invalidate();
 
@@ -113,7 +123,7 @@ public final class OtpHelper
         Instant expiresAt = Instant.now().plus(_timeToLive);
         String nonce = issueNonce(accountId, expiresAt);
 
-        write(new Data(nonce, salt, hash(salt, otp), throttlingKey(accountId), 0, expiresAt.getEpochSecond()));
+        write(new Data(nonce, salt, hash(salt, otp), throttlingKey(identifier), 0, expiresAt.getEpochSecond()));
         return otp;
     }
 
@@ -145,10 +155,11 @@ public final class OtpHelper
      * If the OTP is correct, the OTP is removed from the session.
      * If it is wrong, the user may retry until the maximum number of attempts is reached.
      *
-     * @param otp the OTP entered by the user
+     * @param otp      the OTP entered by the user
+     * @param clientIp the IP address of the client that entered the OTP
      * @return the verification result, holding the account ID if the OTP is correct and has not expired
      */
-    public VerificationResult verify(String otp)
+    public VerificationResult verify(String otp, String clientIp)
     {
         @Nullable Data data = read();
         if (data == null)
@@ -164,10 +175,20 @@ public final class OtpHelper
             return new VerificationResult.Invalid();
         }
 
-        if (_throttler.shouldThrottle(data.throttlingKey, THROTTLING_PURPOSE)
+        // check the client first, so that a throttled client does not use up the attempts for the identifier
+        String clientKey = throttlingKey(clientIp);
+        if (_throttler.shouldThrottle(clientKey, CLIENT_THROTTLING_PURPOSE)
                 instanceof Throttler.ThrottlingResult.Throttled)
         {
-            _logger.debug("OTP verification was throttled");
+            _logger.debug("OTP verification was throttled for the client");
+            return new VerificationResult.Throttled();
+        }
+
+        String identifierKey = data.throttlingKey + "@" + clientKey;
+        if (_throttler.shouldThrottle(identifierKey, THROTTLING_PURPOSE)
+                instanceof Throttler.ThrottlingResult.Throttled)
+        {
+            _logger.debug("OTP verification was throttled for the identifier");
             return new VerificationResult.Throttled();
         }
 
@@ -196,7 +217,8 @@ public final class OtpHelper
         }
 
         _sessionManager.remove(SESSION_KEY);
-        _throttler.clear(data.throttlingKey, THROTTLING_PURPOSE);
+        // the client state is not cleared, as a client could otherwise reset it by completing its own resets
+        _throttler.clear(identifierKey, THROTTLING_PURPOSE);
 
         return new VerificationResult.Verified(accountId.get());
     }

@@ -17,7 +17,10 @@ https://idsvr.example.com/authn/anonymous/usernamepassword/set-password
 
 The page first asks for the OTP. Once it is accepted, the page asks for the new password.\
 The OTP is valid for the configured `OTP Time To Live` (20 minutes by default) and allows 5 attempts, after which a new one must be requested.\
-Attempts are also throttled per account (ignoring case) by the configured Throttler service (the default throttler unless one is configured).\
+Attempts are also throttled by the configured Throttler service (the default throttler unless one is configured):\
+per client IP address, so that a single client cannot keep guessing codes for many users,\
+and per entered username or email and client IP address, so that failed attempts from one client cannot lock out the user from other clients.\
+Since sending is throttled per username or email regardless of the client, the number of codes that can be guessed for a user stays limited.\
 When throttled, the user is asked to try again later, even if the OTP is correct.
 
 ## Expired Codes

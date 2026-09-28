@@ -104,7 +104,7 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
 
         if (model.isOtpSubmission())
         {
-            verifyOtp(model.getOtp(), response);
+            verifyOtp(model.getOtp(), model.getClientIpAddress(), response);
             return null;
         }
 
@@ -136,9 +136,9 @@ public final class UsernamePasswordSetPasswordRequestHandler implements Anonymou
         return null;
     }
 
-    private void verifyOtp(String otp, Response response)
+    private void verifyOtp(String otp, String clientIpAddress, Response response)
     {
-        OtpHelper.VerificationResult result = _otpHelper.verify(otp);
+        OtpHelper.VerificationResult result = _otpHelper.verify(otp, clientIpAddress);
         if (result instanceof OtpHelper.VerificationResult.Verified verified)
         {
             _logger.trace("OTP was accepted and the account ID saved to the session");

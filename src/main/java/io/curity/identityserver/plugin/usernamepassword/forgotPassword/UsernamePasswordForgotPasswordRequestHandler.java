@@ -155,9 +155,8 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         @Nullable String emailValue = AccountAttributes.emailFrom(account);
         boolean accountFound = account != null && emailValue != null;
 
-        // throttle on the account when it exists, otherwise on the entered value, so both cases behave the same
-        @Nullable String throttlingKey = accountFound ? account.getUserName()
-                : StringUtils.isNotBlank(username) ? username : emailAddress;
+        // throttle on the entered value, never on the account, so that throttling cannot reveal whether it exists
+        @Nullable String throttlingKey = StringUtils.isNotBlank(username) ? username : emailAddress;
 
         if (StringUtils.isNotBlank(throttlingKey) && _otpHelper.isSendingThrottled(throttlingKey))
         {
@@ -176,7 +175,7 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
 
         if (accountFound)
         {
-            onAccountFound(response, emailValue, account, setPasswordUrl);
+            onAccountFound(response, emailValue, account, throttlingKey, setPasswordUrl);
         }
         else
         {
@@ -187,9 +186,9 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
     }
 
     private void onAccountFound(Response response, String emailValue, AccountAttributes account,
-                                String setPasswordUrl)
+                                String throttlingKey, String setPasswordUrl)
     {
-        String otp = issueOtp(account);
+        String otp = issueOtp(account, throttlingKey);
 
         var emailModel = new HashMap<String, Object>(2);
         emailModel.put("otp", otp);
@@ -226,11 +225,11 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
         }
     }
 
-    private String issueOtp(AccountAttributes account)
+    private String issueOtp(AccountAttributes account, String throttlingKey)
     {
         try
         {
-            return _otpHelper.issue(account.getUserName());
+            return _otpHelper.issue(account.getUserName(), throttlingKey);
         }
         catch (TokenIssuerException ignored)
         {

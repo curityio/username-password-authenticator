@@ -17,7 +17,7 @@ The plugin must first be configured with an email provider in its settings:
 ![Email Provider](images/shared/authenticator-settings.png)
 
 The plugin also uses a Throttler service to limit how often the reset email is sent and how often OTPs can be verified.\
-Sending is throttled per account, or per entered username or email when no account is found, so both cases behave the same.\
+Sending is throttled per entered username (or email, if no username is entered), ignoring case, whether or not an account exists, so that throttling does not reveal which accounts exist.\
 When sending is throttled, no email is sent, any OTP already sent remains valid, and the user is asked to try again later.\
 If no throttler is configured, the server's default throttler is used.\
 The time the OTP is valid for can be set with the `OTP Time To Live` setting, in seconds.
