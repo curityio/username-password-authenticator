@@ -43,8 +43,8 @@
         <h1 id="recipient" class="recipient recipient-email">
             #message("authenticator.username-password-authenticator.forgot-password.view.success.further-instructions")
             <span>
-            $RegexUtil.replaceGroups($_recipientOfCommunication,
-            "(.*?)([^@]{1,4})(@)(.*?)([^.]{1,4})(\\.)?(.*)?", [2, 5], "x")
+            $_tr.encodeHtml($RegexUtil.replaceGroups($_recipientOfCommunication,
+            "(.*?)([^@]{1,4})(?:(@)(.*?)([^.]{1,4})(\\.)?(.*)?)?", [2, 5], "x"))
             </span>
         </h1>
     </div>

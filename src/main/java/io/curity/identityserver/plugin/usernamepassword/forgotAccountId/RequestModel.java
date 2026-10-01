@@ -63,7 +63,8 @@ public final class RequestModel
 
         Map<String, Object> dataOnError()
         {
-            return singletonMap(PRIMARY_EMAIL_PARAM, HtmlEscapers.htmlEscaper().escape(_primaryEmail));
+            return singletonMap(PRIMARY_EMAIL_PARAM,
+                    _primaryEmail == null ? "" : HtmlEscapers.htmlEscaper().escape(_primaryEmail));
         }
 
         @Email(message = "validation.error.email.invalid")

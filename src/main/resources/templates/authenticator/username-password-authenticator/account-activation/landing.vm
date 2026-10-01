@@ -40,7 +40,7 @@
 
 #define ($_formContent)
     #foreach($param in $formParameters.entrySet())
-    <input type="hidden" name="$param.key" value="$param.value"/>
+    <input type="hidden" name="$_tr.encodeHtmlAttribute($param.key)" value="$_tr.encodeHtmlAttribute($param.value)"/>
     #end
 #end
 

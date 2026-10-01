@@ -182,6 +182,14 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
             onAccountNotFound(response, emailAddress, username, emailValue);
         }
 
+        // Always show the value the user entered, never the email stored in the account, so that the response
+        // is the same whether the account exists or not. The views mask it, and the HTML view escapes it.
+        if (StringUtils.isNotBlank(throttlingKey))
+        {
+            response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, throttlingKey,
+                    Response.ResponseModelScope.NOT_FAILURE);
+        }
+
         return Optional.empty();
     }
 
@@ -196,8 +204,6 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
 
         var emailToSend = new Email(emailModel);
         _emailSender.sendEmail(emailValue, emailToSend, "email/forgot-password/email");
-
-        response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, emailValue, Response.ResponseModelScope.NOT_FAILURE);
     }
 
     private void onAccountNotFound(Response response,
@@ -215,7 +221,6 @@ public final class UsernamePasswordForgotPasswordRequestHandler implements Authe
             // pretend the email was sent out successfully to protect against spear phishing attacks
             var recipient = StringUtils.isNotBlank(username) ? username : emailAddress;
             _otpHelper.storeDecoy(recipient);
-            response.putViewData(ViewModelReservedKeys.RECIPIENT_OF_COMMUNICATION, HtmlEscapers.htmlEscaper().escape(recipient), Response.ResponseModelScope.NOT_FAILURE);
         }
         else
         {

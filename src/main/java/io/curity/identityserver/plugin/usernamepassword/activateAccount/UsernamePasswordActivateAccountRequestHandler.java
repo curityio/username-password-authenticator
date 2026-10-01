@@ -119,7 +119,21 @@ public class UsernamePasswordActivateAccountRequestHandler
             var data = new HashMap<String, Object>(1);
             data.put(ViewModelReservedKeys.ACTIVATION_ENDPOINT, activateAccountUrl);
 
-            ActivationResult activationResult = _accountManager.initializeActivation(account, data);
+            ActivationResult activationResult;
+            try
+            {
+                activationResult = _accountManager.initializeActivation(account, data);
+            }
+            catch (RuntimeException e)
+            {
+                // e.g. no account activator is configured (registration disabled, no verification method).
+                // Respond as for an unknown account, so that the response does not reveal that the account exists.
+                // The exception may contain account details, so it is only logged at DEBUG.
+                _logger.info("Account activation could not be initialized, responding as for an unknown account");
+                _logger.debug("Account activation could not be initialized", e);
+                return null;
+            }
+
             if (activationResult.isDone() || activationResult.isPending())
             {
                 response.setResponseModel(activationResult.getModel(), HttpStatus.OK);

@@ -10,6 +10,7 @@ view.back.to.login=Take me back to the login page
 
 validation.error.token.invalid=The code is no longer valid. Codes are only valid for a short period of time, in the browser where the password reset was requested. Please request a new code.
 validation.error.token.required=Missing token
+validation.error.invalid.account=The account could not be found
 validation.error.password.required=Your have to enter a new password
 validation.error.password.mismatch=Your passwords do not match
 validation.error.otp.required=You have to enter the code

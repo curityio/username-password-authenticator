@@ -96,12 +96,10 @@ public final class UsernamePasswordAuthenticatorPluginDescriptor
     @Override
     public RequestHandlerSet allowedHandlersForCrossSiteNonSafeRequests()
     {
-        // Allowing the set password handlers to be accessed by a cross-site
-        // so that a proper error message is returned, including the ability to generate a new link,
-        // when session is not available.
-        return RequestHandlerSet.of(
-                UsernamePasswordSetPasswordRequestHandler.class,
-                UsernamePasswordActivateAndSetPasswordRequestHandler.class);
+        // No handler accepts cross-site non-safe (e.g. POST) requests. The set-password handlers change the
+        // password of the account held in the session, so they must not accept cross-site POSTs (CSRF).
+        // The links sent by email are opened with a GET, which is not affected, and the forms post same-site.
+        return RequestHandlerSet.none();
     }
 
     @Override
